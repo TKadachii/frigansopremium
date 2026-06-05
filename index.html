@@ -605,6 +605,20 @@
                 setShowModal(false);
             };
 
+            const generateWhatsAppText = () => {
+                if (!orderSummary) return '';
+                let txt = '';
+                if (orderSummary.customerCode) txt += `Cliente: ${orderSummary.customerCode}\n`;
+                if (orderSummary.spamov) txt += `SPAmov: ${orderSummary.spamov}\n`;
+                if (txt !== '') txt += '\n';
+                
+                orderSummary.items.forEach(item => {
+                    txt += `${item.code} - ${item.quantity}x - ${formatPrice(item.unitFinalPrice)}\n`;
+                });
+                txt += `\n*Total a Pagar: ${formatPrice(orderSummary.totalDiscounted)}*`;
+                return txt.trim();
+            };
+
             return (
                 <div className="animate-in fade-in space-y-6">
                     {showModal && (
@@ -629,17 +643,31 @@
                         <button onClick={handleProcessText} className="w-full bg-slate-900 hover:bg-black text-white py-4 rounded-xl font-bold shadow-md transition-all">Analisar Códigos</button>
                     </div>
                     {orderSummary && !showModal && (
-                        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
-                            <h3 className="text-lg font-bold text-slate-800 mb-6">Resultado Financeiro</h3>
-                            <div className="space-y-3 mb-6">
-                                {orderSummary.items.map((i, idx) => (
-                                    <div key={idx} className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
-                                        <div className="font-mono text-sm font-bold text-slate-600">{i.code} <span className="mx-2 text-slate-400">|</span> {i.quantity}x</div>
-                                        <div className="font-bold text-rose-700">{formatPrice(i.discountedPrice)}</div>
-                                    </div>
-                                ))}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
+                                <h3 className="text-lg font-bold text-slate-800 mb-6">Resultado Financeiro</h3>
+                                <div className="space-y-3 mb-6">
+                                    {orderSummary.items.map((i, idx) => (
+                                        <div key={idx} className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                            <div className="font-mono text-sm font-bold text-slate-600">{i.code} <span className="mx-2 text-slate-400">|</span> {i.quantity}x</div>
+                                            <div className="font-bold text-rose-700">{formatPrice(i.discountedPrice)}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="border-t border-slate-200 pt-4 flex justify-between items-center"><span className="font-bold text-slate-500 uppercase text-sm">Fechamento à Vista</span><span className="text-2xl font-black text-rose-800">{formatPrice(orderSummary.totalDiscounted)}</span></div>
                             </div>
-                            <div className="border-t border-slate-200 pt-4 flex justify-between items-center"><span className="font-bold text-slate-500 uppercase text-sm">Fechamento à Vista</span><span className="text-2xl font-black text-rose-800">{formatPrice(orderSummary.totalDiscounted)}</span></div>
+                            
+                            <div className="bg-white rounded-3xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
+                                <div className="p-4 border-b bg-slate-50 flex justify-between items-center">
+                                    <h3 className="font-semibold text-slate-700 flex items-center gap-2"><div className="h-5 w-5 text-emerald-600"><IconWhatsApp /></div> Resumo para WhatsApp</h3>
+                                    <button onClick={() => { navigator.clipboard.writeText(generateWhatsAppText()); showMessage('Copiado para o Zap!', 'success'); }} className="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-4 py-2 rounded-xl text-sm font-bold transition-colors">Copiar</button>
+                                </div>
+                                <div className="p-6 bg-slate-100 flex-1 overflow-y-auto" style={{backgroundImage: "url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')", backgroundSize: 'cover', backgroundPosition: 'center'}}>
+                                    <div className="bg-[#e1ffc7] p-3 rounded-xl shadow-sm border border-[#d3f4b8] inline-block text-left relative min-w-[200px] max-w-full">
+                                        <pre className="font-mono text-sm whitespace-pre-wrap text-slate-800 font-medium">{generateWhatsAppText()}</pre>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -657,8 +685,8 @@
                 products.filter(p => selectedCodes.has(p.code)).forEach(p => {
                     const { hasDiscount, origPrice, unitFinalPrice } = checkDiscountRules(p.code, p.name, p.originalPrice);
                     txt += `Cod: ${p.code}\n\n${p.name}\n`;
-                    if(hasDiscount) txt += `💰 Valor: ~${formatPrice(origPrice)}~ por *${formatPrice(unitFinalPrice)}* 🔥 (-3%)\n\n`;
-                    else txt += `💰 Valor: *${formatPrice(origPrice)}*\n\n`;
+                    if(hasDiscount) txt += `💰 Valor: ~${formatPrice(origPrice)}~ por *${formatPrice(unitFinalPrice)}/kg* 🔥 (Com 3% de Desconto)\n\n`;
+                    else txt += `💰 Valor: *${formatPrice(origPrice)}/kg*\n\n`;
                 }); return txt.trim();
             };
             return (
@@ -666,8 +694,8 @@
                     <header className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6"><h1 className="text-2xl font-bold text-rose-800 flex items-center gap-2 mb-4"><div className="h-6 w-6"><IconTag /></div> Marketing (Zap)</h1><input type="text" placeholder="Digite Picanha, Costela..." value={search} onChange={e=>setSearch(e.target.value)} disabled={products.length===0} className="w-full p-4 rounded-xl border border-slate-200 outline-none focus:border-rose-500 font-bold bg-slate-50"/></header>
                     {search && filtered.length > 0 && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="bg-white rounded-3xl border border-slate-200 flex flex-col h-[500px] overflow-hidden"><div className="p-4 border-b bg-slate-50 font-bold text-slate-700">Escolha</div><div className="overflow-y-auto p-2 space-y-1">{filtered.map(p => (<label key={p.code} className={`flex gap-3 p-4 rounded-xl cursor-pointer border-2 transition-all ${selectedCodes.has(p.code) ? 'border-rose-500 bg-rose-50 shadow-sm' : 'border-transparent hover:bg-slate-50'}`}><input type="checkbox" checked={selectedCodes.has(p.code)} onChange={()=>toggleCode(p.code)} className="mt-1 h-5 w-5 text-rose-700 rounded"/><div><p className="font-bold text-slate-800 text-sm mt-1">{p.name}</p></div></label>))}</div></div>
-                            <div className="bg-white rounded-3xl border border-slate-200 flex flex-col h-[500px] overflow-hidden"><div className="p-4 border-b bg-slate-50 flex justify-between items-center font-bold text-slate-700"><span className="flex items-center gap-2"><IconWhatsApp/> Preview</span><button onClick={() => { navigator.clipboard.writeText(generateText()); showMessage('Copiado para o Zap!', 'success'); }} className="bg-rose-700 text-white px-4 py-2 rounded-xl text-sm">Copiar</button></div><div className="p-6 bg-slate-100 flex-1 overflow-y-auto"><pre className="bg-white p-5 rounded-2xl shadow-sm font-mono text-sm whitespace-pre-wrap">{generateText()}</pre></div></div>
+                            <div className="bg-white rounded-3xl border border-slate-200 flex flex-col h-[500px] overflow-hidden"><div className="p-4 border-b bg-slate-50 flex justify-between items-center font-bold text-slate-700"><span>Escolha os Produtos</span> <button onClick={() => { if(selectedCodes.size === filtered.length) setSelectedCodes(new Set()); else setSelectedCodes(new Set(filtered.map(f=>f.code))); }} className="text-xs bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded-lg">{selectedCodes.size === filtered.length ? 'Desmarcar Todos' : 'Marcar Todos'}</button></div><div className="overflow-y-auto p-2 space-y-1">{filtered.map(p => (<label key={p.code} className={`flex gap-3 p-4 rounded-xl cursor-pointer border-2 transition-all ${selectedCodes.has(p.code) ? 'border-rose-500 bg-rose-50 shadow-sm' : 'border-transparent hover:bg-slate-50'}`}><input type="checkbox" checked={selectedCodes.has(p.code)} onChange={()=>toggleCode(p.code)} className="mt-1 h-5 w-5 text-rose-700 rounded"/><div><p className="font-bold text-slate-800 text-sm mt-1">{p.name}</p></div></label>))}</div></div>
+                            <div className="bg-white rounded-3xl border border-slate-200 flex flex-col h-[500px] overflow-hidden"><div className="p-4 border-b bg-slate-50 flex justify-between items-center font-bold text-slate-700"><span className="flex items-center gap-2"><IconWhatsApp/> Preview</span><button onClick={() => { navigator.clipboard.writeText(generateText()); showMessage('Copiado para o Zap!', 'success'); }} className="bg-rose-700 text-white px-4 py-2 rounded-xl text-sm">Copiar</button></div><div className="p-6 bg-slate-100 flex-1 overflow-y-auto" style={{backgroundImage: "url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')", backgroundSize: 'cover', backgroundPosition: 'center'}}>{selectedCodes.size > 0 ? (<div className="bg-[#e1ffc7] p-4 rounded-xl shadow-sm border border-[#d3f4b8] relative inline-block max-w-full"><pre className="font-mono text-sm whitespace-pre-wrap text-slate-800 font-medium">{generateText()}</pre></div>) : (<div className="h-full flex items-center justify-center text-center"><div className="bg-white/90 p-4 rounded-xl shadow-sm border border-slate-200"><p className="text-slate-600 font-medium">Selecione produtos ao lado.</p></div></div>)}</div></div>
                         </div>
                     )}
                 </div>
@@ -726,25 +754,78 @@
         // SUPPORT & CREDITS
         const SupportScreen = ({ user }) => {
             const [submitted, setSubmitted] = useState(false);
-            const handleSubmit = (e) => { e.preventDefault(); setSubmitted(true); setTimeout(() => setSubmitted(false), 5000); };
+            const [subject, setSubject] = useState('Reportar Erro no Sistema');
+            const [message, setMessage] = useState('');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const body = `Solicitante: ${user.name}\nID Vendedor: ${user.code}\nE-mail Contato: ${user.email}\n\nAssunto: ${subject}\n\n--- Mensagem ---\n${message}`;
+                // Usa o Mailto para abrir o provedor de email nativo
+                window.location.href = `mailto:bruno.moura.f.silva@gmail.com?subject=Suporte Friganso ERP - ${subject}&body=${encodeURIComponent(body)}`;
+                
+                setSubmitted(true); 
+                setTimeout(() => { setSubmitted(false); setMessage(''); }, 5000); 
+            };
+
             return (
                 <div className="animate-in fade-in max-w-3xl mx-auto">
-                    <div className="text-center mb-8"><div className="h-16 w-16 bg-rose-100 text-rose-700 rounded-full flex items-center justify-center mx-auto mb-4"><div className="h-8 w-8"><IconSupport/></div></div><h2 className="text-3xl font-bold text-slate-800">Suporte Técnico</h2></div>
+                    <div className="text-center mb-8"><div className="h-16 w-16 bg-rose-100 text-rose-700 rounded-full flex items-center justify-center mx-auto mb-4"><div className="h-8 w-8"><IconSupport/></div></div><h2 className="text-3xl font-bold text-slate-800">Suporte Técnico</h2><p className="text-slate-500 mt-2">Sua solicitação abrirá diretamente no seu e-mail para envio à Administração.</p></div>
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
                         {submitted ? (
-                            <div className="text-center py-12"><div className="h-16 w-16 text-emerald-500 mx-auto mb-4"><IconCheck/></div><h3 className="text-2xl font-bold text-slate-800 mb-2">Chamado Enviado!</h3></div>
+                            <div className="text-center py-12"><div className="h-16 w-16 text-emerald-500 mx-auto mb-4"><IconCheck/></div><h3 className="text-2xl font-bold text-slate-800 mb-2">Preparando E-mail!</h3><p className="text-slate-500">Seu aplicativo de e-mail foi aberto com os dados preenchidos.</p></div>
                         ) : (
-                            <form onSubmit={handleSubmit} className="space-y-6"><div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div><label className="block text-sm font-bold text-slate-700 mb-1">Solicitante</label><input type="text" value={user.name} disabled className="w-full p-3 bg-slate-100 rounded-xl"/></div><div><label className="block text-sm font-bold text-slate-700 mb-1">E-mail</label><input type="email" value={user.email} disabled className="w-full p-3 bg-slate-100 rounded-xl"/></div></div><div><label className="block text-sm font-bold text-slate-700 mb-1">Assunto</label><select className="w-full p-3 bg-slate-50 border rounded-xl"><option>Reportar Erro</option><option>Dúvida</option></select></div><button type="submit" className="w-full bg-rose-700 text-white font-bold py-4 rounded-xl shadow-lg">Enviar Chamado</button></form>
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div><label className="block text-sm font-bold text-slate-700 mb-1">Solicitante</label><input type="text" value={`${user.name} (ID: ${user.code})`} disabled className="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-500"/></div>
+                                    <div><label className="block text-sm font-bold text-slate-700 mb-1">E-mail Cadastrado</label><input type="email" value={user.email} disabled className="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-500"/></div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-1">Qual é a sua solicitação?</label>
+                                    <select value={subject} onChange={(e) => setSubject(e.target.value)} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 font-medium">
+                                        <option value="Reportar Erro no Sistema">Reportar um Erro no Sistema</option>
+                                        <option value="Solicitar Troca de Senha">Esqueci / Solicitar Troca de Senha</option>
+                                        <option value="Solicitar Troca de E-mail">Solicitar Atualização de E-mail</option>
+                                        <option value="Solicitar Mudança de ID">Solicitar Correção do meu Código (ID)</option>
+                                        <option value="Dúvida de Uso">Dúvida sobre o Aplicativo</option>
+                                        <option value="Outros">Outros Assuntos</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-1">Mensagem ou Justificativa</label>
+                                    <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows="4" required placeholder="Escreva os detalhes da sua solicitação aqui..." className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 resize-none"></textarea>
+                                </div>
+                                <button type="submit" className="w-full bg-rose-700 hover:bg-rose-800 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex justify-center items-center gap-2">
+                                    <div className="h-5 w-5"><IconMail/></div> Abrir E-mail e Enviar
+                                </button>
+                            </form>
                         )}
                     </div>
                 </div>
             );
         };
+
         const CreditsScreen = () => (
-            <div className="animate-in fade-in flex items-center justify-center min-h-[70vh]"><div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden max-w-lg w-full text-center relative"><div className="h-32 bg-slate-900 relative overflow-hidden"><img src={BG_IMAGE} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay" /></div><div className="px-8 pb-8 relative"><div className="w-24 h-24 bg-white rounded-2xl shadow-lg border-4 border-white mx-auto -mt-12 mb-4 overflow-hidden relative z-10 flex items-center justify-center"><FrigansoLogo className="w-16 h-16 object-contain" /></div><h2 className="text-2xl font-black text-slate-800 mb-1">Sistema Friganso Premium ERP</h2><p className="text-slate-500 font-medium mb-6">Versão Cloud - Inteligência & CRM</p><div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-left mb-6"><p className="text-sm text-slate-500 mb-1 uppercase tracking-wider font-bold">Desenvolvedor e Arquiteto</p><p className="text-lg font-bold text-rose-800 mb-4">Bruno Moura</p><p className="text-sm text-slate-500 mb-1 uppercase tracking-wider font-bold">Contato Direto</p><a href="mailto:bruno.moura.f.silva@gmail.com" className="text-blue-600 font-medium flex items-center gap-2"><div className="h-4 w-4"><IconMail/></div> bruno.moura.f.silva@gmail.com</a></div></div></div></div>
+            <div className="animate-in fade-in flex items-center justify-center min-h-[70vh]">
+                <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden max-w-lg w-full text-center relative">
+                    <div className="h-32 bg-slate-900 relative overflow-hidden"><img src={BG_IMAGE} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay" /></div>
+                    <div className="px-8 pb-8 relative">
+                        <div className="w-24 h-24 bg-white rounded-2xl shadow-lg border-4 border-white mx-auto -mt-12 mb-4 overflow-hidden relative z-10 flex items-center justify-center"><FrigansoLogo className="w-16 h-16 object-contain" /></div>
+                        <h2 className="text-2xl font-black text-slate-800 mb-1">Sistema Friganso Premium ERP</h2>
+                        <p className="text-slate-500 font-medium mb-6">Versão Cloud - Inteligência & CRM</p>
+                        <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-left mb-6">
+                            <p className="text-sm text-slate-500 mb-1 uppercase tracking-wider font-bold">Desenvolvedor Chefe</p>
+                            <p className="text-xl font-bold text-rose-800 mb-4 flex items-center flex-wrap gap-2">
+                                Bruno Moura 
+                                <span className="bg-rose-100 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-md text-[10px] uppercase tracking-widest font-black">ID Oficial: 99206</span>
+                            </p>
+                            <p className="text-sm text-slate-500 mb-1 uppercase tracking-wider font-bold">Contato Direto</p>
+                            <a href="mailto:bruno.moura.f.silva@gmail.com" className="text-blue-600 font-medium flex items-center gap-2 hover:underline"><div className="h-4 w-4"><IconMail/></div> bruno.moura.f.silva@gmail.com</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         );
 
-        // APLICATIVO PRINCIPAL (Montagem)
         const App = () => {
             const [user, setUser] = useState(() => { const s = window.localStorage.getItem('friganso_loggedUser'); return s ? JSON.parse(s) : null; });
             const [activeRoute, setActiveRoute] = useState('dashboard');
