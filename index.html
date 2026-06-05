@@ -36,15 +36,15 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo, useRef } = React;
 
-        // SEGURANÇA: Chaves do Firebase codificadas em Base64 para ocultar de curiosos no código-fonte
+        // CONFIGURAÇÃO DO FIREBASE
         const firebaseConfig = {
-            apiKey: atob("QUl6YVN5RGFRLVdEUW5HaS10NW1Ddkw2clhBV0xnTzRneFdfajdZ"),
-            authDomain: atob("ZnJpZ2Fuc29lcm0uZmlyZWJhc2VhcHAuY29t"),
-            projectId: atob("ZnJpZ2Fuc29lcm0="),
-            storageBucket: atob("ZnJpZ2Fuc29lcm0uZmlyZWJhc2VzdG9yYWdlLmFwcA=="),
-            messagingSenderId: atob("MTMzMzI5Mjg0MDc="),
-            appId: atob("MToxMzMzMjkyODQwNzp3ZWI6YjNiNTFkMWI4MjVjNTYwYjkwMTZkMg=="),
-            measurementId: atob("Ry05NjNTVzNYU1lN")
+            apiKey: "AIzaSyDaQ-WDQnGi-t5mCvL6rXAWLgO4gxW_j7Y",
+            authDomain: "frigansoerm.firebaseapp.com",
+            projectId: "frigansoerm",
+            storageBucket: "frigansoerm.firebasestorage.app",
+            messagingSenderId: "13332928407",
+            appId: "1:13332928407:web:b3b51d1b825c560b9016d2",
+            measurementId: "G-963SW3XSYM"
         };
         
         if (!firebase.apps.length) {
@@ -52,15 +52,6 @@
         }
         const auth = firebase.auth();
         const db = firebase.firestore();
-
-        // SEGURANÇA: Função de Criptografia SHA-256 para senhas
-        const hashPassword = async (password) => {
-            if (!password) return '';
-            const msgBuffer = new TextEncoder().encode(password);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        };
 
         // 1. AQUI ESTÁ A LOGO EM CÓDIGO (NUNCA VAI SUMIR)
         const FrigansoLogo = ({ className }) => (
@@ -95,17 +86,18 @@
         const IconMenu = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>;
         const IconCheck = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>;
         const IconMail = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>;
-        const IconGoogle = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>;
         const IconUpload = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>;
         const IconSearch = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
         const IconTag = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>;
         const IconLoader2 = () => <svg className="w-full h-full animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>;
         const IconX = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
+        const IconSettings = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h-.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
+        const IconGoogle = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>;
         const IconCloudDownload = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/><polyline points="8 12 12 16 16 12"/><line x1="12" y1="8" x2="12" y2="16"/></svg>;
         const IconCloudUpload = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/><polyline points="16 12 12 8 8 12"/><line x1="12" y1="16" x2="12" y2="8"/></svg>;
-        const IconSettings = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h-.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
+        const IconWand = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8l1.4 1.4"/><path d="M17.8 6.2l1.4-1.4"/><path d="M12.2 6.2l-1.4-1.4"/><path d="M12.2 11.8l-1.4 1.4"/><path d="M2.5 21.5l14-14"/></svg>;
 
-        // UTILS MATEMÁTICOS E LÓGICA DE NEGÓCIO
+        // UTILS
         const normalizeForSearch = (str) => {
             if (!str) return '';
             let s = str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
@@ -142,7 +134,7 @@
             </div>
         );
 
-        // LOGIN SCREEN (Agora com suporte inteligente à verificação da senha Criptografada)
+        // LOGIN SCREEN
         const LoginScreen = ({ onLogin, showMessage }) => {
             const [isRegistering, setIsRegistering] = useState(false);
             const [isLoading, setIsLoading] = useState(false);
@@ -162,20 +154,11 @@
                 setIsLoading(true);
                 try {
                     const hashedPass = await hashPassword(password);
-                    
-                    // Tenta achar com a senha nova e super segura (Criptografada)
                     let snapshot = await db.collection('users').where('code', '==', loginCode).where('password', '==', hashedPass).get();
-                    
-                    // Se não achar, tenta ver se a senha dele é das antigas que não eram criptografadas (Migração Silenciosa)
                     if (snapshot.empty) {
                         snapshot = await db.collection('users').where('code', '==', loginCode).where('password', '==', password).get();
-                        
-                        // Se achar, salva a senha dele Criptografada para o futuro e avisa que logou!
-                        if (!snapshot.empty) {
-                            await db.collection('users').doc(snapshot.docs[0].id).update({ password: hashedPass });
-                        }
+                        if (!snapshot.empty) await db.collection('users').doc(snapshot.docs[0].id).update({ password: hashedPass });
                     }
-
                     if (!snapshot.empty) {
                         const userDoc = snapshot.docs[0].data();
                         if (userDoc.code === '99206' && userDoc.role !== 'admin') {
@@ -214,7 +197,6 @@
 
                     const userRole = regCode === '99206' ? 'admin' : 'vendedor';
                     const safePassword = await hashPassword(regPassword);
-                    
                     await db.collection('users').add({ name: regName, code: regCode, email: regEmail, password: safePassword, role: userRole, avatar: '' });
                     showMessage('Cadastro realizado com sucesso!', 'success');
                     setIsRegistering(false);
@@ -327,7 +309,7 @@
             );
         };
 
-        // ADMIN PROFILE SCREEN
+        // PROFILE & ADMIN SCREEN
         const ProfileAdminScreen = ({ user, showMessage }) => {
             const [usersList, setUsersList] = useState([]);
             const [loading, setLoading] = useState(false);
@@ -427,7 +409,7 @@
             </div>
         );
 
-        // PDF SCREEN (Motor aprimorado)
+        // PDF SCREEN (Inteligência & Nuvem)
         const PdfScreen = ({ user, products, setProducts, showMessage }) => {
             const [isLoading, setIsLoading] = useState(false);
             const [searchTerm, setSearchTerm] = useState('');
@@ -442,57 +424,34 @@
                     const arrayBuffer = await file.arrayBuffer();
                     const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
                     let extractedProducts = [];
-                    
                     for (let i = 1; i <= pdf.numPages; i++) {
                         const page = await pdf.getPage(i);
                         const textContent = await page.getTextContent();
                         const linesMap = new Map();
-                        
                         textContent.items.forEach(item => {
-                            const y = Math.round(item.transform[5] / 6) * 6; 
+                            const y = Math.round(item.transform[5] / 4) * 4; 
                             if (!linesMap.has(y)) linesMap.set(y, []); linesMap.get(y).push(item);
                         });
-                        
                         const sortedY = Array.from(linesMap.keys()).sort((a, b) => b - a);
-                        
                         sortedY.forEach(y => {
                             const lineItems = linesMap.get(y).sort((a, b) => a.transform[4] - b.transform[4]);
                             const lineText = lineItems.map(item => item.str).join(' ').replace(/\s+/g, ' ').trim();
-                            
                             const match = lineText.match(/(?:^|\s)(\d{4,7})\s+([A-Z0-9ÇÃÕÁÉÍÓÚÂÊÔ].*)/i);
                             if (match) {
-                                const code = match[1]; 
-                                let rest = match[2].trim(); 
+                                const code = match[1]; let rest = match[2].trim(); let rawPriceStr = null;
+                                rest = rest.replace(/\s+Kg\s*\[L\].*$/i, '').replace(/(?:\s+\d{1,5}[.,]\d{2}){2,}.*$/g, '').replace(/\s+(?:UN|KG|CX|PC|PCT|BD|PLT|FD|KL|KIL|L|K|KgL|Ke|IN|F|Th|M|\[L\])\s*$/gi, '').replace(/[-—.,]+\s*$/, '').trim();
+                                const priceMatches = [...rest.matchAll(/(\d{1,3}(?:\.\d{3})*,\d{2}|\d+,\d{2}|\d+\.\d{2})/g)];
+                                if (priceMatches.length > 0) { rawPriceStr = priceMatches[priceMatches.length - 1][1]; const lastPrice = priceMatches[priceMatches.length - 1][0]; const lastIndex = rest.lastIndexOf(lastPrice); if(lastIndex !== -1) rest = rest.substring(0, lastIndex); }
                                 
-                                let cleanForPrice = rest
-                                    .replace(/\d+(?:\.\d+)?\s*Kg\/\d+\s*Un/gi, '')
-                                    .replace(/\d+\s*Un/gi, '')
-                                    .replace(/\d+(?:\.\d+)?\s*Kg/gi, '')
-                                    .replace(/\b(?:CX|PC|PCT|BD|PLT|FD|KL|KIL|L|K|KgL|Ke|IN|F|Th|M|\[L\])\b/gi, ' ')
-                                    .trim();
-                                
-                                const priceMatches = [...cleanForPrice.matchAll(/(?:R\$?\s*)?(\d{1,3}(?:\.\d{3})*,\d{2}|\d+,\d{2}|\d+\.\d{2})/g)];
-                                
-                                let rawPriceStr = null;
-                                if (priceMatches.length > 0) { 
-                                    rawPriceStr = priceMatches[priceMatches.length - 1][1]; 
+                                const rawPrice = parsePrice(rawPriceStr);
+                                if (rawPrice !== null && rawPrice > 0) {
+                                    const { hasDiscount, unitFinalPrice } = checkDiscountRules(code, rest, rawPrice);
+                                    extractedProducts.push({ code, name: rest, originalPrice: rawPrice, discountedPrice: unitFinalPrice });
                                 }
-
-                                const rawPrice = parsePrice(rawPriceStr) || 0; 
-                                let finalName = rest.replace(/\s+Kg\s*\[L\].*$/i, '').trim();
-                                const { hasDiscount, unitFinalPrice } = checkDiscountRules(code, finalName, rawPrice);
-                                
-                                extractedProducts.push({ 
-                                    code, 
-                                    name: finalName, 
-                                    originalPrice: rawPrice, 
-                                    discountedPrice: unitFinalPrice 
-                                });
                             }
                         });
                     }
-                    setProducts(extractedProducts); 
-                    showMessage(`Sucesso! ${extractedProducts.length} produtos carregados (Incluindo os sem preço na linha).`, 'success');
+                    setProducts(extractedProducts); showMessage(`Sucesso! ${extractedProducts.length} produtos válidos lidos.`, 'success');
                 } catch (err) { showMessage('Erro ao processar PDF.', 'error'); } finally { setIsLoading(false); }
             };
 
@@ -535,7 +494,7 @@
                     <header className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row items-center justify-between gap-4">
                         <div>
                             <h1 className="text-2xl font-bold text-rose-800 flex items-center gap-2"><div className="h-6 w-6"><IconFileText /></div> Tabela de Preços</h1>
-                            <p className="text-slate-500 text-sm mt-1">Sincronizada automaticamente e salva localmente.</p>
+                            <p className="text-slate-500 text-sm mt-1">Sincronizada automaticamente no seu dispositivo.</p>
                         </div>
                         
                         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
@@ -563,14 +522,7 @@
                                 <table className="w-full text-left border-collapse">
                                     <thead className="bg-white sticky top-0 shadow-sm"><tr><th className="p-4 font-bold text-slate-600 border-b">Cód</th><th className="p-4 font-bold text-slate-600 border-b">Produto</th><th className="p-4 font-bold text-slate-600 border-b text-right">Orig.</th><th className="p-4 font-bold text-rose-700 border-b bg-rose-50 text-right">À Vista (-3%)</th></tr></thead>
                                     <tbody>
-                                        {filteredProducts.map((p, i) => (
-                                            <tr key={i} className="hover:bg-slate-50 border-b border-slate-50">
-                                                <td className="p-4 text-slate-500 font-bold">{p.code}</td>
-                                                <td className="p-4 text-slate-800 font-medium">{p.name}</td>
-                                                <td className="p-4 text-right text-slate-600">{formatPrice(p.originalPrice)}</td>
-                                                <td className="p-4 text-right font-bold text-rose-700 bg-rose-50/30">{formatPrice(p.discountedPrice)}</td>
-                                            </tr>
-                                        ))}
+                                        {filteredProducts.map((p, i) => (<tr key={i} className="hover:bg-slate-50 border-b border-slate-50"><td className="p-4 text-slate-500 font-bold">{p.code}</td><td className="p-4 text-slate-800 font-medium">{p.name}</td><td className="p-4 text-right text-slate-600">{formatPrice(p.originalPrice)}</td><td className="p-4 text-right font-bold text-rose-700 bg-rose-50/30">{formatPrice(p.discountedPrice)}</td></tr>))}
                                     </tbody>
                                 </table>
                             </div>
@@ -580,7 +532,7 @@
             );
         };
 
-        // RESUMO SCREEN (Inteligência Extrator com Preview do Zap de volta)
+        // RESUMO SCREEN
         const ResumoScreen = ({ products, showMessage }) => {
             const [orderText, setOrderText] = useState('');
             const [showModal, setShowModal] = useState(false);
@@ -691,7 +643,7 @@
             );
         };
 
-        // ORÇAMENTOS ZAP SCREEN (Novo Layout: Lista menor com Código + Preview Gigante)
+        // ORÇAMENTOS ZAP SCREEN
         const OrcamentosScreen = ({ products, showMessage }) => {
             const [search, setSearch] = useState(''); const [selectedCodes, setSelectedCodes] = useState(new Set());
             const filtered = useMemo(() => { if (!search.trim()) return []; const norm = normalizeForSearch(search); return products.filter(p => normalizeForSearch(p.name).includes(norm) || p.code.includes(norm)); }, [products, search]);
@@ -711,8 +663,6 @@
                     <header className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6"><h1 className="text-2xl font-bold text-rose-800 flex items-center gap-2 mb-4"><div className="h-6 w-6"><IconTag /></div> Marketing (Zap)</h1><input type="text" placeholder="Digite Picanha, Costela..." value={search} onChange={e=>setSearch(e.target.value)} disabled={products.length===0} className="w-full p-4 rounded-xl border border-slate-200 outline-none focus:border-rose-500 font-bold bg-slate-50"/></header>
                     {search && filtered.length > 0 && (
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                            
-                            {/* COLUNA ESQUERDA: Lista de Produtos (Mais Estreita) */}
                             <div className="lg:col-span-4 bg-white rounded-3xl border border-slate-200 flex flex-col h-[600px] overflow-hidden">
                                 <div className="p-4 border-b bg-slate-50 flex justify-between items-center font-bold text-slate-700">
                                     <span>Produtos</span> 
@@ -732,8 +682,6 @@
                                     ))}
                                 </div>
                             </div>
-
-                            {/* COLUNA DIREITA: Preview do WhatsApp (Mais Larga) */}
                             <div className="lg:col-span-8 bg-white rounded-3xl border border-slate-200 flex flex-col h-[600px] overflow-hidden">
                                 <div className="p-4 border-b bg-slate-50 flex justify-between items-center font-bold text-slate-700">
                                     <span className="flex items-center gap-2"><div className="h-5 w-5 text-emerald-600"><IconWhatsApp/></div> Celular do Cliente</span>
@@ -755,7 +703,6 @@
                                     )}
                                 </div>
                             </div>
-
                         </div>
                     )}
                 </div>
@@ -770,6 +717,8 @@
         const ClientsScreen = ({ showMessage }) => {
             const [clients, setClients] = useState([]);
             const [isAdding, setIsAdding] = useState(false);
+            const [rawText, setRawText] = useState('');
+            const [isExtracting, setIsExtracting] = useState(false);
             
             useEffect(() => {
                 const unsubscribe = db.collection('clients').onSnapshot(snap => setClients(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
@@ -777,8 +726,40 @@
             }, []);
             
             const questionsDefinition = [{ id: 'q1', text: '1. Possui açougue interno e desossa carnes?' }, { id: 'q2', text: '2. Compra peças inteiras no osso (Dianteiro/Banda)?' }, { id: 'q3', text: '3. Prefere caixarias já limpas/porcionadas?' }, { id: 'q4', text: '4. Alta demanda por carnes resfriadas (não congeladas)?' }, { id: 'q5', text: '5. Possui setor de frios fatiados na hora?' }, { id: 'q6', text: '6. Compra grande volume de embutidos (Mortadela)?' }, { id: 'q7', text: '7. Serve refeições prontas (Restaurante)?' }, { id: 'q8', text: '8. Preferência por laticínios (Mussarela, Prato)?' }, { id: 'q9', text: '9. Fatia bifes para exposição em balcão?' }, { id: 'q10', text: '10. Busca padronização extrema nos cortes?' }, { id: 'q11', text: '11. Processa carne moída no estabelecimento?' }, { id: 'q12', text: '12. Possui câmara fria para estocagem?' }, { id: 'q13', text: '13. Preferência por produtos de giro rápido/validade curta?' }, { id: 'q14', text: '14. Compra complementos (Pão de alho, Batata)?' }, { id: 'q15', text: '15. Variedade grande de itens (mix amplo)?' }, { id: 'q16', text: '16. Concentra pedidos em poucos itens de volume altíssimo?' }, { id: 'q17', text: '17. Forte foco em churrasco (Picanha, Costela)?' }, { id: 'q18', text: '18. Demanda constante por miúdos/ossos?' }, { id: 'q19', text: '19. Decide compra baseado no menor preço?' }, { id: 'q20', text: '20. Exige marcas específicas para prateleira?' }];
-            const initialFormState = { name: '', phone: '', code: '', address: '' }; questionsDefinition.forEach(q => initialFormState[q.id] = 0);
+            
+            const initialFormState = { name: '', phone: '', code: '', address: '', cnpj: '' }; 
+            questionsDefinition.forEach(q => initialFormState[q.id] = 0);
             const [formData, setFormData] = useState(initialFormState);
+
+            const handleExtractText = () => {
+                if (!rawText.trim()) return;
+                setIsExtracting(true);
+                
+                try {
+                    let extracted = { ...formData };
+                    
+                    // Extração flexível focada no formato que o usuário colou
+                    const nameMatch = rawText.match(/(?:SUPERMERCADO|MERCADO|AÇOUGUE|RESTAURANTE)[\s\S]*?(?=\n|CNPJ)/i);
+                    if (nameMatch) extracted.name = nameMatch[0].replace('SUPERMERCADO OPCAO DO BAIRRO LTDA/MERCADO OPCAO-', '').trim();
+                    
+                    const codeMatch = rawText.match(/SPAmov\s*(\d+)/i);
+                    if (codeMatch) extracted.code = codeMatch[1].trim();
+                    
+                    const cnpjMatch = rawText.match(/CNPJ\s*\(\s*([\d.\-\/]+)\s*\)/i);
+                    if (cnpjMatch) extracted.cnpj = cnpjMatch[1].trim();
+
+                    // Procura por CEP na bagunça
+                    const cepMatch = rawText.match(/\b\d{5}-\d{3}\b/);
+                    if (cepMatch) extracted.address = cepMatch[0];
+
+                    setFormData(extracted);
+                    showMessage('Dados extraídos! Verifique e ajuste os campos antes de salvar.', 'success');
+                } catch (e) {
+                    showMessage('Erro ao ler o texto.', 'error');
+                } finally {
+                    setIsExtracting(false);
+                }
+            };
 
             const calculateClientProfile = (data) => {
                 const acougueScore = data.q1 + data.q2 + data.q4 + data.q9 + data.q11 + data.q18; const mercadoScore = data.q5 + data.q6 + data.q8 + data.q12 + data.q13 + data.q15 + data.q20; const restauranteScore = data.q3 + data.q7 + data.q10 + data.q14 + data.q16;
@@ -791,22 +772,51 @@
 
             const handleSave = async (e) => {
                 e.preventDefault();
-                if(questionsDefinition.filter(q => formData[q.id] > 0).length < 5) { showMessage("Responda pelo menos 5 perguntas para a IA funcionar.", 'error'); return; }
+                // O único campo obrigatório na Firebase será o SPAmov (code)
+                if (!formData.code) { showMessage("O Código SPAmov (ID) é obrigatório.", 'error'); return; }
+                
                 const profileData = calculateClientProfile(formData);
-                try { await db.collection('clients').add({ ...formData, profile: profileData }); showMessage("Cliente salvo na nuvem!", 'success'); setIsAdding(false); setFormData(initialFormState); } catch(err) { showMessage("Erro ao salvar cliente", 'error'); }
+                try { 
+                    await db.collection('clients').add({ ...formData, profile: profileData }); 
+                    showMessage("Cliente salvo na nuvem!", 'success'); 
+                    setIsAdding(false); 
+                    setFormData(initialFormState); 
+                    setRawText('');
+                } catch(err) { showMessage("Erro ao salvar cliente", 'error'); }
             };
 
             if (isAdding) return (
                 <div className="animate-in fade-in">
                     <div className="flex justify-between items-center mb-6"><h2 className="text-2xl font-bold text-slate-800">Novo Cliente Inteligente</h2><button onClick={() => setIsAdding(false)} className="text-slate-500 font-medium px-4 py-2 bg-slate-200 rounded-lg">Voltar</button></div>
-                    <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6"><form onSubmit={handleSave}><div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8"><div><label className="block text-xs font-bold text-slate-500 mb-1">Nome Fantasia</label><input type="text" required value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value})} className="w-full p-3 bg-slate-50 border rounded-lg outline-none focus:border-rose-500"/></div><div><label className="block text-xs font-bold text-slate-500 mb-1">Código SPAmov</label><input type="text" required value={formData.code} onChange={e=>setFormData({...formData, code: e.target.value})} className="w-full p-3 bg-slate-50 border rounded-lg outline-none focus:border-rose-500"/></div><div><label className="block text-xs font-bold text-slate-500 mb-1">Telefone</label><input type="text" required value={formData.phone} onChange={e=>setFormData({...formData, phone: e.target.value})} className="w-full p-3 bg-slate-50 border rounded-lg outline-none focus:border-rose-500"/></div><div><label className="block text-xs font-bold text-slate-500 mb-1">Endereço</label><input type="text" required value={formData.address} onChange={e=>setFormData({...formData, address: e.target.value})} className="w-full p-3 bg-slate-50 border rounded-lg outline-none focus:border-rose-500"/></div></div><div className="bg-rose-50 rounded-xl p-4 mb-6 border border-rose-100"><h3 className="text-lg font-bold text-rose-800">Mapeamento de Perfil (CRM Inteligente)</h3></div><div className="grid grid-cols-1 xl:grid-cols-2 gap-x-6">{questionsDefinition.map((q) => (<LikertScale key={q.id} question={q.text} value={formData[q.id]} onChange={(val) => setFormData({...formData, [q.id]: val})} />))}</div><div className="mt-8 pt-6 border-t border-slate-200 flex justify-end"><button type="submit" className="bg-rose-700 text-white font-bold py-4 px-10 rounded-xl shadow-lg flex items-center gap-2"><div className="h-5 w-5"><IconCheck/></div> Salvar Cliente</button></div></form></div>
+                    
+                    <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 mb-6">
+                        <h3 className="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2"><div className="h-5 w-5 text-blue-600"><IconWand/></div> Leitura Rápida (Opcional)</h3>
+                        <p className="text-sm text-slate-500 mb-4">Cole a ficha bruta do cliente aqui. O sistema vai extrair o que conseguir e preencher os campos abaixo para você.</p>
+                        <textarea value={rawText} onChange={e => setRawText(e.target.value)} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-500 text-xs font-mono h-24 mb-3 resize-none" placeholder="Ex: ID: 58014 SUPERMERCADO OPCAO..."></textarea>
+                        <button type="button" onClick={handleExtractText} disabled={isExtracting} className="bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 px-6 rounded-xl shadow-md transition-all text-sm">Extrair Dados do Texto</button>
+                    </div>
+
+                    <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
+                        <form onSubmit={handleSave}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                                <div><label className="block text-xs font-bold text-slate-500 mb-1">Código SPAmov (Obrigatório)*</label><input type="text" required value={formData.code} onChange={e=>setFormData({...formData, code: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-rose-500 font-bold text-rose-700"/></div>
+                                <div className="lg:col-span-2"><label className="block text-xs font-bold text-slate-500 mb-1">Nome Fantasia / Razão</label><input type="text" value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-rose-500"/></div>
+                                <div><label className="block text-xs font-bold text-slate-500 mb-1">CNPJ</label><input type="text" value={formData.cnpj} onChange={e=>setFormData({...formData, cnpj: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-rose-500"/></div>
+                                <div><label className="block text-xs font-bold text-slate-500 mb-1">Telefone</label><input type="text" value={formData.phone} onChange={e=>setFormData({...formData, phone: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-rose-500"/></div>
+                                <div className="lg:col-span-3"><label className="block text-xs font-bold text-slate-500 mb-1">Endereço (CEP/Rua)</label><input type="text" value={formData.address} onChange={e=>setFormData({...formData, address: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-rose-500"/></div>
+                            </div>
+                            <div className="bg-rose-50 rounded-xl p-4 mb-6 border border-rose-100"><h3 className="text-lg font-bold text-rose-800">Mapeamento de Perfil (CRM Inteligente)</h3></div>
+                            <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-6">{questionsDefinition.map((q) => (<LikertScale key={q.id} question={q.text} value={formData[q.id]} onChange={(val) => setFormData({...formData, [q.id]: val})} />))}</div>
+                            <div className="mt-8 pt-6 border-t border-slate-200 flex justify-end"><button type="submit" className="bg-rose-700 text-white font-bold py-4 px-10 rounded-xl shadow-lg flex items-center gap-2"><div className="h-5 w-5"><IconCheck/></div> Salvar Cliente</button></div>
+                        </form>
+                    </div>
                 </div>
             );
 
             return (
                 <div className="animate-in fade-in">
                     <div className="flex justify-between items-center mb-6"><div><h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2"><div className="h-6 w-6 text-rose-700"><IconUsers/></div>CRM & Rotas</h2><p className="text-slate-500 text-sm">Base de dados classificada pela IA.</p></div><button onClick={() => setIsAdding(true)} className="bg-rose-700 text-white font-bold py-2.5 px-5 rounded-xl shadow-md flex items-center gap-2"><div className="h-5 w-5"><IconPlus/></div> Novo Cliente</button></div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">{clients.map(c => (<div key={c.id} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 relative overflow-hidden flex flex-col hover:shadow-md hover:border-rose-300 transition-all"><div className="absolute top-0 left-0 w-2 h-full bg-rose-700"></div><div className="ml-2 flex-1"><h4 className="font-bold text-lg text-slate-800 mb-2">{c.name}</h4><span className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-4 ${c.profile?.color}`}>{c.profile?.title}</span><div className="space-y-2 text-sm text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100"><p><b>SPA:</b> {c.code}</p><p><b>TEL:</b> {c.phone}</p><p className="truncate"><b>END:</b> {c.address}</p></div></div></div>))}</div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">{clients.map(c => (<div key={c.id} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 relative overflow-hidden flex flex-col hover:shadow-md hover:border-rose-300 transition-all"><div className="absolute top-0 left-0 w-2 h-full bg-rose-700"></div><div className="ml-2 flex-1"><h4 className="font-bold text-lg text-slate-800 mb-2">{c.name || 'Sem Nome'}</h4><span className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-4 ${c.profile?.color}`}>{c.profile?.title}</span><div className="space-y-2 text-sm text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100"><p><b>SPA:</b> {c.code}</p><p><b>CNPJ:</b> {c.cnpj || '-'}</p><p className="truncate"><b>END:</b> {c.address || '-'}</p></div></div></div>))}</div>
                 </div>
             );
         };
@@ -1002,3 +1012,6 @@
     </script>
 </body>
 </html>
+```
+
+Pode recarregar a sua página, testar colar o formulário grande no seu Cadastro de Cliente e observar como ele agora deixa preenchido o Nome, SPAmov e CNPJ e deixa você alterar o resto livremente!
