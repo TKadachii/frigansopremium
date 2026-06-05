@@ -36,7 +36,6 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo, useRef } = React;
 
-        // SEGURANÇA: Chaves ofuscadas
         const firebaseConfig = {
             apiKey: atob("QUl6YVN5RGFRLVdEUW5HaS10NW1Ddkw2clhBV0xnTzRneFdfajdZ"),
             authDomain: atob("ZnJpZ2Fuc29lcm0uZmlyZWJhc2VhcHAuY29t"),
@@ -159,12 +158,10 @@
                 try {
                     const hashedPass = await hashPassword(password);
                     let snapshot = await db.collection('users').where('code', '==', loginCode).where('password', '==', hashedPass).get();
-                    
                     if (snapshot.empty) {
                         snapshot = await db.collection('users').where('code', '==', loginCode).where('password', '==', password).get();
                         if (!snapshot.empty) await db.collection('users').doc(snapshot.docs[0].id).update({ password: hashedPass });
                     }
-
                     if (!snapshot.empty) {
                         const userDoc = snapshot.docs[0].data();
                         if (userDoc.code === '99206' && userDoc.role !== 'admin') {
@@ -694,17 +691,28 @@
             const [clients, setClients] = useState([]);
             const [isAdding, setIsAdding] = useState(false);
             const [rawClientText, setRawClientText] = useState('');
-            const [selectedClientForHistory, setSelectedClientForHistory] = useState(null);
+            
+            // Modal de Perfil
+            const [selectedClient, setSelectedClient] = useState(null);
+            const [editForm, setEditForm] = useState({});
             const [rawHistoryText, setRawHistoryText] = useState('');
-            const [isExtracting, setIsExtracting] = useState(false);
+            const [isExtractingHistory, setIsExtractingHistory] = useState(false);
             
             useEffect(() => {
                 const unsubscribe = db.collection('clients').onSnapshot(snap => setClients(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
                 return () => unsubscribe();
             }, []);
+
+            // Mantém os dados da edição sempre sincronizados se o firebase atualizar
+            useEffect(() => {
+                if(selectedClient) {
+                    const current = clients.find(c => c.id === selectedClient.id);
+                    if(current) setEditForm(current);
+                }
+            }, [selectedClient, clients]);
             
             const questionsDefinition = [{ id: 'q1', text: '1. Possui açougue interno e desossa carnes?' }, { id: 'q2', text: '2. Compra peças inteiras no osso (Dianteiro/Banda)?' }, { id: 'q3', text: '3. Prefere caixarias já limpas/porcionadas?' }, { id: 'q4', text: '4. Alta demanda por carnes resfriadas (não congeladas)?' }, { id: 'q5', text: '5. Possui setor de frios fatiados na hora?' }, { id: 'q6', text: '6. Compra grande volume de embutidos (Mortadela)?' }, { id: 'q7', text: '7. Serve refeições prontas (Restaurante)?' }, { id: 'q8', text: '8. Preferência por laticínios (Mussarela, Prato)?' }, { id: 'q9', text: '9. Fatia bifes para exposição em balcão?' }, { id: 'q10', text: '10. Busca padronização extrema nos cortes?' }, { id: 'q11', text: '11. Processa carne moída no estabelecimento?' }, { id: 'q12', text: '12. Possui câmara fria para estocagem?' }, { id: 'q13', text: '13. Preferência por produtos de giro rápido/validade curta?' }, { id: 'q14', text: '14. Compra complementos (Pão de alho, Batata)?' }, { id: 'q15', text: '15. Variedade grande de itens (mix amplo)?' }, { id: 'q16', text: '16. Concentra pedidos em poucos itens de volume altíssimo?' }, { id: 'q17', text: '17. Forte foco em churrasco (Picanha, Costela)?' }, { id: 'q18', text: '18. Demanda constante por miúdos/ossos?' }, { id: 'q19', text: '19. Decide compra baseado no menor preço?' }, { id: 'q20', text: '20. Exige marcas específicas para prateleira?' }];
-            const initialFormState = { name: '', phone: '', code: '', cnpj: '', address: '' }; questionsDefinition.forEach(q => initialFormState[q.id] = 0);
+            const initialFormState = { name: '', contactName: '', phone: '', code: '', cnpj: '', address: '' }; questionsDefinition.forEach(q => initialFormState[q.id] = 0);
             const [formData, setFormData] = useState(initialFormState);
 
             const calculateClientProfile = (data) => {
@@ -731,13 +739,35 @@
                     }
                     const cepMatch = rawClientText.match(/\b\d{5}-\d{3}\b/);
                     if (cepMatch) extracted.address = cepMatch[0];
-                    setFormData(extracted); showMessage('Dados extraídos! Ajuste se necessário.', 'success');
+                    setFormData(extracted); showMessage('Dados extraídos! Preencha o nome do Contato se souber.', 'success');
                 } catch (e) { showMessage('Erro na extração.', 'error'); }
+            };
+
+            const handleSaveNewClient = async (e) => {
+                e.preventDefault();
+                if(!formData.code) { showMessage("ID do Cliente é obrigatório.", 'error'); return; }
+                const profileData = calculateClientProfile(formData);
+                try { await db.collection('clients').add({ ...formData, profile: profileData, history: [] }); showMessage("Cliente salvo na nuvem!", 'success'); setIsAdding(false); setFormData(initialFormState); setRawClientText(''); } catch(err) { showMessage("Erro ao salvar cliente", 'error'); }
+            };
+
+            const handleUpdateClient = async () => {
+                if(!editForm.code) { showMessage("O ID não pode ficar vazio.", "error"); return; }
+                try {
+                    await db.collection('clients').doc(selectedClient.id).update({
+                        name: editForm.name,
+                        contactName: editForm.contactName,
+                        code: editForm.code,
+                        cnpj: editForm.cnpj,
+                        phone: editForm.phone,
+                        address: editForm.address
+                    });
+                    showMessage("Alterações salvas!", "success");
+                } catch(e) { showMessage("Erro ao atualizar.", "error"); }
             };
 
             const handleExtractHistory = async () => {
                 if (!rawHistoryText.trim()) return;
-                setIsExtracting(true);
+                setIsExtractingHistory(true);
                 try {
                     const matches = [...rawHistoryText.matchAll(/\d*S(\d{4,7})/g)];
                     let foundCodes = matches.map(m => m[1]);
@@ -745,22 +775,14 @@
                         products.forEach(p => { if (rawHistoryText.includes(p.code)) foundCodes.push(p.code); });
                     }
                     const validCodes = [...new Set(foundCodes)].filter(code => products.some(p => p.code === code));
-                    if (validCodes.length === 0) { showMessage('Nenhum código reconhecido no PDF atual.', 'error'); setIsExtracting(false); return; }
+                    if (validCodes.length === 0) { showMessage('Nenhum código reconhecido. Verifique o PDF.', 'error'); setIsExtractingHistory(false); return; }
                     
-                    const currentHistory = selectedClientForHistory.history || [];
+                    const currentHistory = editForm.history || [];
                     const newHistory = [...new Set([...currentHistory, ...validCodes])];
-                    await db.collection('clients').doc(selectedClientForHistory.id).update({ history: newHistory });
-                    setSelectedClientForHistory({...selectedClientForHistory, history: newHistory});
+                    await db.collection('clients').doc(selectedClient.id).update({ history: newHistory });
                     setRawHistoryText('');
                     showMessage(`${validCodes.length} produtos adicionados ao histórico!`, 'success');
-                } catch (e) { showMessage('Erro ao salvar.', 'error'); } finally { setIsExtracting(false); }
-            };
-
-            const handleSave = async (e) => {
-                e.preventDefault();
-                if(!formData.code) { showMessage("ID do Cliente é obrigatório.", 'error'); return; }
-                const profileData = calculateClientProfile(formData);
-                try { await db.collection('clients').add({ ...formData, profile: profileData, history: [] }); showMessage("Cliente salvo na nuvem!", 'success'); setIsAdding(false); setFormData(initialFormState); setRawClientText(''); } catch(err) { showMessage("Erro ao salvar cliente", 'error'); }
+                } catch (e) { showMessage('Erro ao salvar.', 'error'); } finally { setIsExtractingHistory(false); }
             };
 
             if (isAdding) return (
@@ -774,17 +796,18 @@
                     </div>
 
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
-                        <form onSubmit={handleSave}>
+                        <form onSubmit={handleSaveNewClient}>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                                <div><label className="block text-xs font-bold text-slate-500 mb-1">Nome Fantasia / Razão</label><input type="text" value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-rose-500 font-bold text-slate-800"/></div>
+                                <div><label className="block text-xs font-bold text-slate-500 mb-1">Nome do Contato (Dono/Comprador)</label><input type="text" value={formData.contactName} onChange={e=>setFormData({...formData, contactName: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-rose-500"/></div>
                                 <div><label className="block text-xs font-bold text-slate-500 mb-1">ID do Cliente (Obrigatório)*</label><input type="text" required value={formData.code} onChange={e=>setFormData({...formData, code: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-rose-500 font-bold text-rose-700"/></div>
-                                <div><label className="block text-xs font-bold text-slate-500 mb-1">Nome Fantasia / Razão</label><input type="text" value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-rose-500"/></div>
                                 <div><label className="block text-xs font-bold text-slate-500 mb-1">CNPJ</label><input type="text" value={formData.cnpj} onChange={e=>setFormData({...formData, cnpj: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-rose-500"/></div>
-                                <div><label className="block text-xs font-bold text-slate-500 mb-1">Telefone</label><input type="text" value={formData.phone} onChange={e=>setFormData({...formData, phone: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-rose-500"/></div>
-                                <div className="lg:col-span-2"><label className="block text-xs font-bold text-slate-500 mb-1">Endereço</label><input type="text" value={formData.address} onChange={e=>setFormData({...formData, address: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-rose-500"/></div>
+                                <div><label className="block text-xs font-bold text-slate-500 mb-1">Telefone / Zap</label><input type="text" value={formData.phone} onChange={e=>setFormData({...formData, phone: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-rose-500"/></div>
+                                <div><label className="block text-xs font-bold text-slate-500 mb-1">Endereço Completo</label><input type="text" value={formData.address} onChange={e=>setFormData({...formData, address: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-rose-500"/></div>
                             </div>
                             <div className="bg-rose-50 rounded-xl p-4 mb-6 border border-rose-100"><h3 className="text-lg font-bold text-rose-800">Mapeamento de Perfil (CRM Inteligente)</h3></div>
                             <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-6">{questionsDefinition.map((q) => (<LikertScale key={q.id} question={q.text} value={formData[q.id]} onChange={(val) => setFormData({...formData, [q.id]: val})} />))}</div>
-                            <div className="mt-8 pt-6 border-t border-slate-200 flex justify-end"><button type="submit" className="bg-rose-700 text-white font-bold py-4 px-10 rounded-xl shadow-lg flex items-center gap-2"><div className="h-5 w-5"><IconCheck/></div> Salvar Cliente</button></div>
+                            <div className="mt-8 pt-6 border-t border-slate-200 flex justify-end"><button type="submit" className="bg-rose-700 hover:bg-rose-800 text-white font-bold py-4 px-10 rounded-xl shadow-lg transition-all flex items-center gap-2"><div className="h-5 w-5"><IconCheck/></div> Salvar Cliente</button></div>
                         </form>
                     </div>
                 </div>
@@ -792,55 +815,101 @@
 
             return (
                 <div className="animate-in fade-in relative">
-                    {selectedClientForHistory && (
+                    {/* MODAL: PERFIL COMPLETO DO CLIENTE */}
+                    {selectedClient && (
                         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden">
-                                <div className="p-6 border-b bg-slate-50 flex justify-between items-center">
-                                    <div><h2 className="text-xl font-bold text-slate-800">Histórico de Compras</h2><p className="text-sm text-slate-500">Cliente ID: {selectedClientForHistory.code} - {selectedClientForHistory.name}</p></div>
-                                    <button onClick={() => setSelectedClientForHistory(null)} className="h-8 w-8 text-slate-400 hover:text-rose-600"><IconX/></button>
-                                </div>
-                                <div className="p-6 overflow-y-auto flex-1 bg-slate-50">
-                                    <div className="bg-white p-4 rounded-2xl border border-slate-200 mb-6 shadow-sm">
-                                        <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2"><div className="h-4 w-4 text-blue-500"><IconWand/></div> Colar Histórico Bruto</label>
-                                        <textarea value={rawHistoryText} onChange={e => setRawHistoryText(e.target.value)} placeholder="Cole as tabelas de pedidos antigos do cliente aqui..." className="w-full h-32 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-500 font-mono text-xs resize-none"></textarea>
-                                        <div className="mt-3 flex justify-end"><button onClick={handleExtractHistory} disabled={isExtracting} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md transition-all flex items-center gap-2">{isExtracting ? <IconLoader2/> : <IconUpload/>} Processar e Salvar</button></div>
-                                    </div>
-                                    <h3 className="font-bold text-slate-700 mb-3 flex items-center gap-2"><div className="h-5 w-5 text-rose-600"><IconHistory/></div> Produtos que ele costuma comprar:</h3>
-                                    {(!selectedClientForHistory.history || selectedClientForHistory.history.length === 0) ? (
-                                        <p className="text-slate-500 text-sm italic">Nenhum produto registrado no histórico.</p>
-                                    ) : (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                            {selectedClientForHistory.history.map(code => {
-                                                const p = products.find(prod => prod.code === code);
-                                                return (
-                                                    <div key={code} className="p-3 bg-white border border-slate-200 rounded-xl flex items-center gap-3 shadow-sm">
-                                                        <span className="bg-rose-100 text-rose-700 px-2 py-1 rounded text-xs font-bold">{code}</span>
-                                                        <span className="text-sm font-medium text-slate-700 leading-tight">{p ? p.name : 'Produto Arquivado/Sem Nome'}</span>
-                                                    </div>
-                                                );
-                                            })}
+                            <div className="bg-slate-50 rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95">
+                                
+                                {/* Cabeçalho do Perfil */}
+                                <div className="p-6 border-b border-slate-200 bg-white flex justify-between items-center shadow-sm z-10">
+                                    <div className="flex items-center gap-4">
+                                        <div className="h-14 w-14 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-xl">
+                                            {editForm.name ? editForm.name.charAt(0) : 'C'}
                                         </div>
-                                    )}
+                                        <div>
+                                            <h2 className="text-2xl font-bold text-slate-800 leading-none">{editForm.name || 'Empresa'}</h2>
+                                            <p className="text-sm font-medium text-slate-500 mt-1">ID Cliente: <span className="font-bold text-rose-700">{editForm.code}</span></p>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => setSelectedClient(null)} className="h-10 w-10 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-500 transition-colors"><IconX/></button>
+                                </div>
+
+                                <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                        
+                                        {/* SEÇÃO 1: DADOS E EDIÇÃO */}
+                                        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                                            <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-2 flex items-center gap-2"><div className="h-5 w-5 text-blue-500"><IconUser/></div> Informações de Contato</h3>
+                                            <div className="space-y-3">
+                                                <div><label className="text-xs font-bold text-slate-500">Nome Fantasia</label><input type="text" value={editForm.name || ''} onChange={e => setEditForm({...editForm, name: e.target.value})} className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-800"/></div>
+                                                <div><label className="text-xs font-bold text-slate-500">Contato (Dono/Comprador)</label><input type="text" value={editForm.contactName || ''} onChange={e => setEditForm({...editForm, contactName: e.target.value})} className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"/></div>
+                                                <div className="flex gap-3">
+                                                    <div className="flex-1"><label className="text-xs font-bold text-slate-500">ID Cliente</label><input type="text" value={editForm.code || ''} onChange={e => setEditForm({...editForm, code: e.target.value})} className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"/></div>
+                                                    <div className="flex-1"><label className="text-xs font-bold text-slate-500">CNPJ</label><input type="text" value={editForm.cnpj || ''} onChange={e => setEditForm({...editForm, cnpj: e.target.value})} className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"/></div>
+                                                </div>
+                                                <div><label className="text-xs font-bold text-slate-500">Telefone</label><input type="text" value={editForm.phone || ''} onChange={e => setEditForm({...editForm, phone: e.target.value})} className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"/></div>
+                                                <div><label className="text-xs font-bold text-slate-500">Endereço</label><textarea value={editForm.address || ''} onChange={e => setEditForm({...editForm, address: e.target.value})} className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm resize-none" rows="2"></textarea></div>
+                                                <div className="pt-2"><button onClick={handleUpdateClient} className="w-full py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-sm font-bold shadow-md transition-colors">Salvar Alterações</button></div>
+                                            </div>
+                                        </div>
+
+                                        {/* SEÇÃO 2: HISTÓRICO DE COMPRAS */}
+                                        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+                                            <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-2 mb-4 flex items-center gap-2"><div className="h-5 w-5 text-rose-600"><IconHistory/></div> Produtos do Cliente</h3>
+                                            
+                                            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-4">
+                                                <label className="block text-xs font-bold text-slate-600 mb-2">Colar Tabela ERP para atualizar histórico</label>
+                                                <textarea value={rawHistoryText} onChange={e => setRawHistoryText(e.target.value)} placeholder="Cole 1S0210CARNE SECA P.A..." className="w-full h-16 p-2 bg-white border border-slate-200 rounded-lg outline-none text-xs font-mono resize-none"></textarea>
+                                                <div className="mt-2 flex justify-end">
+                                                    <button onClick={handleExtractHistory} disabled={isExtractingHistory} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg font-bold text-xs shadow-sm transition-all flex items-center gap-1">
+                                                        {isExtractingHistory ? <IconLoader2/> : <IconPlus/>} Adicionar ao Histórico
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex-1 overflow-y-auto pr-1">
+                                                {(!editForm.history || editForm.history.length === 0) ? (
+                                                    <div className="h-full flex items-center justify-center text-slate-400 text-sm font-medium italic">Nenhum histórico registrado.</div>
+                                                ) : (
+                                                    <div className="space-y-2">
+                                                        {editForm.history.map(code => {
+                                                            const p = products.find(prod => prod.code === code);
+                                                            return (
+                                                                <div key={code} className="p-2.5 bg-white border border-slate-100 rounded-lg flex items-center gap-3 shadow-sm hover:border-rose-200 transition-colors">
+                                                                    <span className="bg-rose-100 text-rose-700 px-2 py-1 rounded text-xs font-black">{code}</span>
+                                                                    <span className="text-xs font-medium text-slate-700 leading-tight flex-1">{p ? p.name : 'Produto Arquivado'}</span>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    <div className="flex justify-between items-center mb-6"><div><h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2"><div className="h-6 w-6 text-rose-700"><IconUsers/></div>CRM & Rotas</h2><p className="text-slate-500 text-sm">Base de dados classificada pela IA.</p></div><button onClick={() => setIsAdding(true)} className="bg-rose-700 text-white font-bold py-2.5 px-5 rounded-xl shadow-md flex items-center gap-2"><div className="h-5 w-5"><IconPlus/></div> Novo Cliente</button></div>
+                    <div className="flex justify-between items-center mb-6"><div><h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2"><div className="h-6 w-6 text-rose-700"><IconUsers/></div>CRM & Rotas</h2><p className="text-slate-500 text-sm">Base de dados classificada pela IA.</p></div><button onClick={() => setIsAdding(true)} className="bg-rose-700 hover:bg-rose-800 text-white font-bold py-2.5 px-5 rounded-xl shadow-md transition-all flex items-center gap-2"><div className="h-5 w-5"><IconPlus/></div> Novo Cliente</button></div>
+                    
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                         {clients.map(c => (
-                            <div key={c.id} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 relative overflow-hidden flex flex-col hover:shadow-md hover:border-rose-300 transition-all">
-                                <div className="absolute top-0 left-0 w-2 h-full bg-rose-700"></div>
+                            <div key={c.id} onClick={() => setSelectedClient(c)} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 relative overflow-hidden flex flex-col hover:shadow-md hover:border-rose-400 hover:scale-[1.02] transition-all cursor-pointer group">
+                                <div className="absolute top-0 left-0 w-2 h-full bg-rose-700 group-hover:bg-rose-500 transition-colors"></div>
                                 <div className="ml-2 flex-1">
-                                    <h4 className="font-bold text-lg text-slate-800 mb-2 truncate">{c.name || 'Sem Nome'}</h4>
-                                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-4 ${c.profile?.color}`}>{c.profile?.title}</span>
-                                    <div className="space-y-2 text-sm text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                        <p><b>ID Cli:</b> {c.code}</p>
-                                        <p><b>CNPJ:</b> {c.cnpj || '-'}</p>
-                                        <p className="truncate"><b>END:</b> {c.address || '-'}</p>
+                                    <h4 className="font-bold text-lg text-slate-800 leading-tight truncate">{c.name || 'Empresa S/ Nome'}</h4>
+                                    {c.contactName && <p className="text-xs font-bold text-slate-400 mb-2 truncate uppercase">Contato: <span className="text-slate-600">{c.contactName}</span></p>}
+                                    
+                                    <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-bold mt-1 mb-4 ${c.profile?.color || 'bg-slate-100 text-slate-600'}`}>{c.profile?.title || 'Perfil Base'}</span>
+                                    
+                                    <div className="space-y-1.5 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                        <p><b className="text-slate-400">ID:</b> <span className="font-mono font-bold">{c.code}</span></p>
+                                        {c.cnpj && <p><b className="text-slate-400">CNPJ:</b> {c.cnpj}</p>}
+                                        <p className="truncate"><b className="text-slate-400">END:</b> {c.address || '-'}</p>
                                     </div>
                                 </div>
-                                <button onClick={() => setSelectedClientForHistory(c)} className="mt-4 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm"><div className="h-4 w-4"><IconHistory/></div> Histórico de Compras</button>
                             </div>
                         ))}
                     </div>
@@ -862,24 +931,34 @@
 
             return (
                 <div className="animate-in fade-in max-w-3xl mx-auto">
-                    <div className="text-center mb-8"><div className="h-16 w-16 bg-rose-100 text-rose-700 rounded-full flex items-center justify-center mx-auto mb-4"><div className="h-8 w-8"><IconSupport/></div></div><h2 className="text-3xl font-bold text-slate-800">Suporte Técnico</h2></div>
+                    <div className="text-center mb-8"><div className="h-16 w-16 bg-rose-100 text-rose-700 rounded-full flex items-center justify-center mx-auto mb-4"><div className="h-8 w-8"><IconSupport/></div></div><h2 className="text-3xl font-bold text-slate-800">Suporte Técnico</h2><p className="text-slate-500 mt-2">Sua solicitação será enviada diretamente para a Administração.</p></div>
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
                         {submitted ? (
-                            <div className="text-center py-12"><div className="h-16 w-16 text-emerald-500 mx-auto mb-4"><IconCheck/></div><h3 className="text-2xl font-bold text-slate-800 mb-2">Preparando E-mail!</h3></div>
+                            <div className="text-center py-12"><div className="h-16 w-16 text-emerald-500 mx-auto mb-4"><IconCheck/></div><h3 className="text-2xl font-bold text-slate-800 mb-2">Preparando E-mail!</h3><p className="text-slate-500">Seu aplicativo de e-mail foi aberto com os dados preenchidos.</p></div>
                         ) : (
                             <form onSubmit={handleSubmit} className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div><label className="block text-sm font-bold text-slate-700 mb-1">Solicitante</label><input type="text" value={`${user.name} (ID: ${user.code})`} disabled className="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-500"/></div><div><label className="block text-sm font-bold text-slate-700 mb-1">E-mail Cadastrado</label><input type="email" value={user.email} disabled className="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-500"/></div></div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div><label className="block text-sm font-bold text-slate-700 mb-1">Solicitante</label><input type="text" value={`${user.name} (ID: ${user.code})`} disabled className="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-500"/></div>
+                                    <div><label className="block text-sm font-bold text-slate-700 mb-1">E-mail Cadastrado</label><input type="email" value={user.email} disabled className="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-500"/></div>
+                                </div>
                                 <div>
                                     <label className="block text-sm font-bold text-slate-700 mb-1">Qual é a sua solicitação?</label>
-                                    <select value={subject} onChange={(e) => setSubject(e.target.value)} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-rose-500 font-medium">
+                                    <select value={subject} onChange={(e) => setSubject(e.target.value)} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 font-medium">
                                         <option value="Reportar Erro no Sistema">Reportar um Erro no Sistema</option>
                                         <option value="Solicitar Troca de Senha">Esqueci / Solicitar Troca de Senha</option>
+                                        <option value="Solicitar Troca de E-mail">Solicitar Atualização de E-mail</option>
                                         <option value="Solicitar Mudança de ID">Solicitar Correção do meu Código (ID)</option>
                                         <option value="Dúvida de Uso">Dúvida sobre o Aplicativo</option>
+                                        <option value="Outros">Outros Assuntos</option>
                                     </select>
                                 </div>
-                                <div><label className="block text-sm font-bold text-slate-700 mb-1">Mensagem</label><textarea value={message} onChange={(e) => setMessage(e.target.value)} rows="4" required className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-rose-500 resize-none"></textarea></div>
-                                <button type="submit" className="w-full bg-rose-700 hover:bg-rose-800 text-white font-bold py-4 rounded-xl shadow-lg flex justify-center items-center gap-2"><div className="h-5 w-5"><IconMail/></div> Abrir E-mail e Enviar</button>
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-1">Mensagem ou Justificativa</label>
+                                    <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows="4" required placeholder="Escreva os detalhes da sua solicitação aqui..." className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 resize-none"></textarea>
+                                </div>
+                                <button type="submit" className="w-full bg-rose-700 hover:bg-rose-800 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex justify-center items-center gap-2">
+                                    <div className="h-5 w-5"><IconMail/></div> Abrir E-mail e Enviar
+                                </button>
                             </form>
                         )}
                     </div>
@@ -887,7 +966,25 @@
             );
         };
         const CreditsScreen = () => (
-            <div className="animate-in fade-in flex items-center justify-center min-h-[70vh]"><div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden max-w-lg w-full text-center relative"><div className="h-32 bg-slate-900 relative overflow-hidden"><img src={BG_IMAGE} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay" /></div><div className="px-8 pb-8 relative"><div className="w-24 h-24 bg-white rounded-2xl shadow-lg border-4 border-white mx-auto -mt-12 mb-4 overflow-hidden relative z-10 flex items-center justify-center"><FrigansoLogo className="w-16 h-16 object-contain" /></div><h2 className="text-2xl font-black text-slate-800 mb-1">Sistema Friganso Premium ERP</h2><p className="text-slate-500 font-medium mb-6">Versão Cloud - Inteligência & CRM</p><div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-left mb-6"><p className="text-sm text-slate-500 mb-1 uppercase tracking-wider font-bold">Desenvolvedor Oficial e CEO</p><p className="text-xl font-bold text-rose-800 mb-4 flex items-center flex-wrap gap-2">Bruno Moura <span className="bg-rose-100 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-md text-[10px] uppercase tracking-widest font-black">ID Admin: 99206</span></p><p className="text-sm text-slate-500 mb-1 uppercase tracking-wider font-bold">Contato Direto</p><a href="mailto:bruno.moura.f.silva@gmail.com" className="text-blue-600 font-medium flex items-center gap-2 hover:underline"><div className="h-4 w-4"><IconMail/></div> bruno.moura.f.silva@gmail.com</a></div></div></div></div>
+            <div className="animate-in fade-in flex items-center justify-center min-h-[70vh]">
+                <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden max-w-lg w-full text-center relative">
+                    <div className="h-32 bg-slate-900 relative overflow-hidden"><img src={BG_IMAGE} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay" /></div>
+                    <div className="px-8 pb-8 relative">
+                        <div className="w-24 h-24 bg-white rounded-2xl shadow-lg border-4 border-white mx-auto -mt-12 mb-4 overflow-hidden relative z-10 flex items-center justify-center"><FrigansoLogo className="w-16 h-16 object-contain" /></div>
+                        <h2 className="text-2xl font-black text-slate-800 mb-1">Sistema Friganso Premium ERP</h2>
+                        <p className="text-slate-500 font-medium mb-6">Versão Cloud - Inteligência & CRM</p>
+                        <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-left mb-6">
+                            <p className="text-sm text-slate-500 mb-1 uppercase tracking-wider font-bold">Desenvolvedor Oficial e CEO</p>
+                            <p className="text-xl font-bold text-rose-800 mb-4 flex items-center flex-wrap gap-2">
+                                Bruno Moura 
+                                <span className="bg-rose-100 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-md text-[10px] uppercase tracking-widest font-black">ID Admin Oficial: 99206</span>
+                            </p>
+                            <p className="text-sm text-slate-500 mb-1 uppercase tracking-wider font-bold">Contato Direto</p>
+                            <a href="mailto:bruno.moura.f.silva@gmail.com" className="text-blue-600 font-medium flex items-center gap-2 hover:underline"><div className="h-4 w-4"><IconMail/></div> bruno.moura.f.silva@gmail.com</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         );
 
         const App = () => {
