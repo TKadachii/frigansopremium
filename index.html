@@ -51,6 +51,24 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
+        // LOGO GERADA POR CÓDIGO (Nunca vai sumir/quebrar)
+        const FrigansoLogo = ({ className }) => (
+            <svg className={className} viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="roseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#e11d48" />
+                        <stop offset="100%" stopColor="#881337" />
+                    </linearGradient>
+                </defs>
+                <path d="M100 10 L180 50 L180 140 L100 190 L20 140 L20 50 Z" fill="url(#roseGrad)" />
+                <path d="M100 30 L160 60 L160 130 L100 165 L40 130 L40 60 Z" fill="#0f172a" />
+                <path d="M85 70 L125 70 L125 85 L100 85 L100 100 L120 100 L120 115 L100 115 L100 140 L85 140 Z" fill="#ffffff" />
+            </svg>
+        );
+
+        // IMAGEM DE FUNDO PREMIUM (Unsplash Direto)
+        const BG_IMAGE = "https://images.unsplash.com/photo-1607623814075-e51df1bd682f?q=80&w=2000&auto=format&fit=crop";
+
         // ICONS
         const IconUser = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
         const IconLock = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>;
@@ -71,8 +89,10 @@
         const IconTag = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>;
         const IconLoader2 = () => <svg className="w-full h-full animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>;
         const IconX = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
-        const IconSettings = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
+        const IconSettings = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h-.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
         const IconGoogle = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>;
+        const IconCloudDownload = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/><polyline points="8 12 12 16 16 12"/><line x1="12" y1="8" x2="12" y2="16"/></svg>;
+        const IconCloudUpload = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/><polyline points="16 12 12 8 8 12"/><line x1="12" y1="16" x2="12" y2="8"/></svg>;
 
         // UTILS
         const normalizeForSearch = (str) => {
@@ -201,12 +221,12 @@
 
             return (
                 <div className="min-h-screen flex items-center justify-center bg-slate-900 relative overflow-hidden p-4">
-                    <img src="image_c2642f.jpg" className="absolute inset-0 w-full h-full object-cover opacity-20" />
+                    <img src={BG_IMAGE} className="absolute inset-0 w-full h-full object-cover opacity-20" />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-rose-950/80 to-transparent"></div>
                     
                     <div className="w-full max-w-md p-8 glass rounded-3xl shadow-2xl relative z-10 border border-white/20 animate-in fade-in slide-in-from-bottom-4">
                         <div className="flex flex-col items-center mb-6">
-                            <img src="image_c26485.png" alt="Friganso Logo" className="h-20 w-20 object-contain rounded-2xl bg-black/80 p-2 shadow-lg border border-rose-500/50 mb-4" />
+                            <FrigansoLogo className="h-20 w-20 rounded-2xl bg-black/80 p-2 shadow-lg border border-rose-500/50 mb-4" />
                             <h1 className="text-3xl font-extrabold text-slate-800">Friganso<span className="text-rose-700">ERP</span></h1>
                             <p className="text-slate-500 text-sm mt-1">{isRegistering ? 'Crie sua conta de Vendedor' : 'Gestão Inteligente de Vendas'}</p>
                         </div>
@@ -320,7 +340,7 @@
         const DashboardScreen = ({ user }) => (
             <div className="animate-in fade-in space-y-6">
                 <div className="bg-slate-900 rounded-3xl p-8 text-white relative overflow-hidden shadow-xl border border-slate-800">
-                    <img src="image_c2642f.jpg" className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay" />
+                    <img src={BG_IMAGE} className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay" />
                     <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-rose-950/90 to-transparent"></div>
                     <div className="relative z-10">
                         <h2 className="text-3xl font-extrabold mb-1">Olá, {user.name}!</h2>
@@ -341,14 +361,14 @@
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                         <div className="h-10 w-10 bg-rose-100 text-rose-700 rounded-xl flex items-center justify-center mb-4"><IconFileText/></div>
                         <p className="text-slate-500 font-semibold text-sm">Leitor de Tabela</p>
-                        <h3 className="text-xl font-bold text-slate-800 mt-1 truncate text-rose-600">Requer PDF</h3>
+                        <h3 className="text-xl font-bold text-slate-800 mt-1 truncate text-rose-600">Conectado à Nuvem</h3>
                     </div>
                 </div>
             </div>
         );
 
-        // PDF SCREEN (Inteligência)
-        const PdfScreen = ({ products, setProducts, showMessage }) => {
+        // PDF SCREEN (Inteligência & Nuvem)
+        const PdfScreen = ({ user, products, setProducts, showMessage }) => {
             const [isLoading, setIsLoading] = useState(false);
             const [searchTerm, setSearchTerm] = useState('');
 
@@ -380,14 +400,47 @@
                                 rest = rest.replace(/\s+Kg\s*\[L\].*$/i, '').replace(/(?:\s+\d{1,5}[.,]\d{2}){2,}.*$/g, '').replace(/\s+(?:UN|KG|CX|PC|PCT|BD|PLT|FD|KL|KIL|L|K|KgL|Ke|IN|F|Th|M|\[L\])\s*$/gi, '').replace(/[-—.,]+\s*$/, '').trim();
                                 const priceMatches = [...rest.matchAll(/(\d{1,3}(?:\.\d{3})*,\d{2}|\d+,\d{2}|\d+\.\d{2})/g)];
                                 if (priceMatches.length > 0) { rawPriceStr = priceMatches[priceMatches.length - 1][1]; const lastPrice = priceMatches[priceMatches.length - 1][0]; const lastIndex = rest.lastIndexOf(lastPrice); if(lastIndex !== -1) rest = rest.substring(0, lastIndex); }
+                                
                                 const rawPrice = parsePrice(rawPriceStr);
-                                const { hasDiscount, unitFinalPrice } = checkDiscountRules(code, rest, rawPrice);
-                                extractedProducts.push({ code, name: rest, originalPrice: rawPrice, discountedPrice: unitFinalPrice });
+                                // REGRAS DE PREÇO APLICADAS: Só salva produtos que tenham preço real maior que 0
+                                if (rawPrice !== null && rawPrice > 0) {
+                                    const { hasDiscount, unitFinalPrice } = checkDiscountRules(code, rest, rawPrice);
+                                    extractedProducts.push({ code, name: rest, originalPrice: rawPrice, discountedPrice: unitFinalPrice });
+                                }
                             }
                         });
                     }
-                    setProducts(extractedProducts); showMessage(`Sucesso! ${extractedProducts.length} produtos lidos.`, 'success');
+                    setProducts(extractedProducts); showMessage(`Sucesso! ${extractedProducts.length} produtos válidos lidos.`, 'success');
                 } catch (err) { showMessage('Erro ao processar PDF.', 'error'); } finally { setIsLoading(false); }
+            };
+
+            const handleDistribute = async () => {
+                try {
+                    setIsLoading(true);
+                    await db.collection('system_data').doc('shared_pdf').set({ products, updatedAt: new Date() });
+                    showMessage('Tabela salva na Nuvem para todos os Vendedores!', 'success');
+                } catch(e) {
+                    showMessage('Erro ao distribuir tabela.', 'error');
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            const handleDownloadCloud = async () => {
+                try {
+                    setIsLoading(true);
+                    const doc = await db.collection('system_data').doc('shared_pdf').get();
+                    if(doc.exists) {
+                        setProducts(doc.data().products);
+                        showMessage('Tabela mais recente da Nuvem baixada com sucesso!', 'success');
+                    } else {
+                        showMessage('O Administrador ainda não distribuiu nenhuma tabela.', 'error');
+                    }
+                } catch(e) {
+                    showMessage('Erro ao baixar tabela da nuvem.', 'error');
+                } finally {
+                    setIsLoading(false);
+                }
             };
 
             const filteredProducts = useMemo(() => {
@@ -398,12 +451,29 @@
             return (
                 <div className="animate-in fade-in space-y-6">
                     <header className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-                        <div><h1 className="text-2xl font-bold text-rose-800 flex items-center gap-2"><div className="h-6 w-6"><IconFileText /></div> Tabela de Preços</h1><p className="text-slate-500 text-sm mt-1">Carregue o PDF atualizado para o sistema.</p></div>
-                        <div className="relative">
-                            <input type="file" accept=".pdf" onChange={handleFileUpload} disabled={isLoading} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                            <button disabled={isLoading} className="bg-rose-700 hover:bg-rose-800 text-white px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 shadow-md"><div className="h-5 w-5">{isLoading ? <IconLoader2 /> : <IconUpload />}</div>{isLoading ? 'Lendo...' : 'Importar PDF'}</button>
+                        <div>
+                            <h1 className="text-2xl font-bold text-rose-800 flex items-center gap-2"><div className="h-6 w-6"><IconFileText /></div> Tabela de Preços</h1>
+                            <p className="text-slate-500 text-sm mt-1">Sincronizada automaticamente no seu dispositivo.</p>
+                        </div>
+                        
+                        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                            <button onClick={handleDownloadCloud} disabled={isLoading} className="bg-slate-800 hover:bg-slate-900 text-white px-5 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-md">
+                                <div className="h-5 w-5"><IconCloudDownload /></div> Nuvem
+                            </button>
+                            <div className="relative flex-1 sm:flex-none">
+                                <input type="file" accept=".pdf" onChange={handleFileUpload} disabled={isLoading} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                                <button disabled={isLoading} className="w-full bg-rose-700 hover:bg-rose-800 text-white px-5 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-md">
+                                    <div className="h-5 w-5">{isLoading ? <IconLoader2 /> : <IconUpload />}</div>{isLoading ? 'Lendo...' : 'Ler PDF'}
+                                </button>
+                            </div>
+                            {user.role === 'admin' && products.length > 0 && (
+                                <button onClick={handleDistribute} disabled={isLoading} className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-md">
+                                    <div className="h-5 w-5"><IconCloudUpload /></div> Distribuir Tabela
+                                </button>
+                            )}
                         </div>
                     </header>
+
                     {products.length > 0 && (
                         <div className="bg-white rounded-3xl shadow-sm border border-slate-200 flex flex-col h-[60vh] overflow-hidden">
                             <div className="p-4 border-b border-slate-100 bg-slate-50 relative"><div className="absolute left-7 top-1/2 -translate-y-1/2 text-slate-400 h-5 w-5"><IconSearch /></div><input type="text" placeholder="Pesquise por código ou nome..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-rose-500 outline-none font-medium" /></div>
@@ -431,7 +501,7 @@
             const [orderSummary, setOrderSummary] = useState(null);
 
             const handleProcessText = () => {
-                if (products.length === 0) { showMessage('Importe o PDF primeiro!', 'error'); return; }
+                if (products.length === 0) { showMessage('Importe ou Baixe a Tabela primeiro!', 'error'); return; }
                 if (!orderText.trim()) { showMessage('Cole o texto.', 'error'); return; }
                 try {
                     let customerName = '', spamov = '';
@@ -447,9 +517,9 @@
                         if (codeFound && !extractedItemsMap.has(codeFound)) { const realProduct = products.find(p => p.code === codeFound); extractedItemsMap.set(codeFound, { code: codeFound, name: realProduct.name, quantity: '' }); }
                     });
 
-                    if (extractedItemsMap.size === 0) { showMessage('Nenhum código na mensagem.', 'error'); return; }
+                    if (extractedItemsMap.size === 0) { showMessage('Nenhum código encontrado na mensagem.', 'error'); return; }
                     setPendingCustomer(customerName); setPendingSpamov(spamov); setPendingItems(Array.from(extractedItemsMap.values())); setShowModal(true);
-                } catch (err) { showMessage('Erro crítico.', 'error'); }
+                } catch (err) { showMessage('Erro crítico ao ler pedido.', 'error'); }
             };
 
             const handleConfirmModal = () => {
@@ -586,7 +656,7 @@
             <div className="animate-in fade-in max-w-3xl mx-auto"><div className="text-center mb-8"><div className="h-16 w-16 bg-rose-100 text-rose-700 rounded-full flex items-center justify-center mx-auto mb-4"><div className="h-8 w-8"><IconSupport/></div></div><h2 className="text-3xl font-bold text-slate-800">Suporte Técnico</h2></div><div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8"><form className="space-y-6"><div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div><label className="block text-sm font-bold text-slate-700 mb-1">Solicitante</label><input type="text" value={user.name} disabled className="w-full p-3 bg-slate-100 rounded-xl"/></div><div><label className="block text-sm font-bold text-slate-700 mb-1">E-mail</label><input type="email" value={user.email} disabled className="w-full p-3 bg-slate-100 rounded-xl"/></div></div><div><label className="block text-sm font-bold text-slate-700 mb-1">Assunto</label><select className="w-full p-3 bg-slate-50 border rounded-xl"><option>Reportar Erro</option><option>Dúvida</option></select></div><button type="button" className="w-full bg-rose-700 text-white font-bold py-4 rounded-xl shadow-lg">Enviar Chamado</button></form></div></div>
         );
         const CreditsScreen = () => (
-            <div className="animate-in fade-in flex items-center justify-center min-h-[70vh]"><div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden max-w-lg w-full text-center relative"><div className="h-32 bg-slate-900 relative overflow-hidden"><img src="image_c2642f.jpg" className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay" /></div><div className="px-8 pb-8 relative"><div className="w-24 h-24 bg-white rounded-2xl shadow-lg border-4 border-white mx-auto -mt-12 mb-4 overflow-hidden relative z-10 flex items-center justify-center"><img src="image_c26485.png" alt="Friganso" className="w-16 h-16 object-contain" /></div><h2 className="text-2xl font-black text-slate-800 mb-1">Sistema Friganso Premium ERP</h2><p className="text-slate-500 font-medium mb-6">Versão Cloud - Inteligência & CRM</p><div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-left mb-6"><p className="text-sm text-slate-500 mb-1 uppercase tracking-wider font-bold">Desenvolvedor</p><p className="text-lg font-bold text-rose-800 mb-4">Bruno Moura</p><p className="text-sm text-slate-500 mb-1 uppercase tracking-wider font-bold">Contato Direto</p><a href="mailto:bruno.moura.f.silva@gmail.com" className="text-blue-600 font-medium flex items-center gap-2"><div className="h-4 w-4"><IconMail/></div> bruno.moura.f.silva@gmail.com</a></div></div></div></div>
+            <div className="animate-in fade-in flex items-center justify-center min-h-[70vh]"><div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden max-w-lg w-full text-center relative"><div className="h-32 bg-slate-900 relative overflow-hidden"><img src={BG_IMAGE} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay" /></div><div className="px-8 pb-8 relative"><div className="w-24 h-24 bg-white rounded-2xl shadow-lg border-4 border-white mx-auto -mt-12 mb-4 overflow-hidden relative z-10 flex items-center justify-center"><FrigansoLogo className="w-16 h-16 object-contain" /></div><h2 className="text-2xl font-black text-slate-800 mb-1">Sistema Friganso Premium ERP</h2><p className="text-slate-500 font-medium mb-6">Versão Cloud - Inteligência & CRM</p><div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-left mb-6"><p className="text-sm text-slate-500 mb-1 uppercase tracking-wider font-bold">Desenvolvedor</p><p className="text-lg font-bold text-rose-800 mb-4">Bruno Moura</p><p className="text-sm text-slate-500 mb-1 uppercase tracking-wider font-bold">Contato Direto</p><a href="mailto:bruno.moura.f.silva@gmail.com" className="text-blue-600 font-medium flex items-center gap-2"><div className="h-4 w-4"><IconMail/></div> bruno.moura.f.silva@gmail.com</a></div></div></div></div>
         );
 
         const App = () => {
@@ -594,7 +664,17 @@
             const [activeRoute, setActiveRoute] = useState('dashboard');
             const [isSidebarOpen, setIsSidebarOpen] = useState(false);
             const [messageBox, setMessageBox] = useState(null);
-            const [products, setProducts] = useState([]);
+            
+            // PERSISTÊNCIA: A tabela lida fica guardada no navegador (não some no F5)
+            const [products, setProductsState] = useState(() => {
+                const savedProds = window.localStorage.getItem('friganso_products');
+                return savedProds ? JSON.parse(savedProds) : [];
+            });
+
+            const setProducts = (newProducts) => {
+                setProductsState(newProducts);
+                window.localStorage.setItem('friganso_products', JSON.stringify(newProducts));
+            };
 
             const handleSetUser = (userData) => {
                 if (userData) window.localStorage.setItem('friganso_loggedUser', JSON.stringify(userData));
@@ -620,7 +700,7 @@
                     case 'support': return <SupportScreen user={user} />;
                     case 'credits': return <CreditsScreen />;
                     case 'profile': return <ProfileAdminScreen user={user} showMessage={showMessage} />;
-                    case 'pdf': return <PdfScreen products={products} setProducts={setProducts} showMessage={showMessage} />;
+                    case 'pdf': return <PdfScreen user={user} products={products} setProducts={setProducts} showMessage={showMessage} />;
                     case 'resumo': return <ResumoScreen products={products} showMessage={showMessage} />;
                     case 'orcamentos': return <OrcamentosScreen products={products} showMessage={showMessage} />;
                     default: return <DashboardScreen user={user} />;
@@ -643,7 +723,7 @@
 
                     <div className={`fixed inset-y-0 left-0 z-40 w-72 bg-slate-950 text-slate-300 transform transition-transform duration-300 ease-in-out flex flex-col ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static border-r border-slate-800 shadow-2xl`}>
                         <div className="p-6 border-b border-slate-800 flex items-center gap-4 bg-slate-900/50">
-                            <img src="image_c26485.png" alt="Logo" className="h-12 w-12 rounded-xl bg-black/50 p-1.5 shadow-inner border border-slate-700" />
+                            <FrigansoLogo className="h-12 w-12 rounded-xl bg-black/50 p-1.5 shadow-inner border border-slate-700" />
                             <div>
                                 <h1 className="text-xl font-black text-white tracking-tight">FRIGANSO</h1>
                                 <p className="text-[10px] text-rose-500 tracking-widest uppercase font-bold">Premium ERP</p>
@@ -683,7 +763,7 @@
                     </div>
 
                     <div className="flex-1 overflow-y-auto relative z-0 p-4 pt-20 md:p-8 bg-slate-100">
-                        <div className="absolute inset-0 pointer-events-none opacity-[0.02] bg-[url('https://images.unsplash.com/photo-1607623814075-e51df1bd682f?q=80&w=2000')] bg-cover bg-center"></div>
+                        <div className="absolute inset-0 pointer-events-none opacity-[0.02]" style={{ backgroundImage: `url('${BG_IMAGE}')`, backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
                         <div className="relative z-10 max-w-7xl mx-auto">
                             {renderContent()}
                         </div>
