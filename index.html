@@ -26,6 +26,8 @@
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
         .glass-dark { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body>
@@ -51,7 +53,7 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // LOGO GERADA POR CÓDIGO (Nunca vai sumir/quebrar)
+        // 1. AQUI ESTÁ A LOGO EM CÓDIGO (NUNCA VAI SUMIR)
         const FrigansoLogo = ({ className }) => (
             <svg className={className} viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
                 <defs>
@@ -66,17 +68,17 @@
             </svg>
         );
 
-        // IMAGEM DE FUNDO PREMIUM (Unsplash Direto)
+        // 2. AQUI ESTÁ A FOTO DE FUNDO DAS CARNES (HOSPEDADA EM NUVEM EXTERNA)
         const BG_IMAGE = "https://images.unsplash.com/photo-1607623814075-e51df1bd682f?q=80&w=2000&auto=format&fit=crop";
 
         // ICONS
         const IconUser = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
         const IconLock = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>;
         const IconDashboard = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>;
-        const IconUsers = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
         const IconFileText = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>;
         const IconReceipt = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg>;
         const IconWhatsApp = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>;
+        const IconUsers = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
         const IconSupport = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>;
         const IconCode = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>;
         const IconLogOut = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>;
@@ -84,17 +86,17 @@
         const IconMenu = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>;
         const IconCheck = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>;
         const IconMail = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>;
+        const IconGoogle = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>;
         const IconUpload = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>;
         const IconSearch = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
         const IconTag = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>;
         const IconLoader2 = () => <svg className="w-full h-full animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>;
         const IconX = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
-        const IconSettings = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h-.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
-        const IconGoogle = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>;
         const IconCloudDownload = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/><polyline points="8 12 12 16 16 12"/><line x1="12" y1="8" x2="12" y2="16"/></svg>;
         const IconCloudUpload = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/><polyline points="16 12 12 8 8 12"/><line x1="12" y1="16" x2="12" y2="8"/></svg>;
+        const IconSettings = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h-.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
 
-        // UTILS
+        // UTILS MATEMÁTICOS E LÓGICA DE NEGÓCIO
         const normalizeForSearch = (str) => {
             if (!str) return '';
             let s = str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
@@ -131,7 +133,7 @@
             </div>
         );
 
-        // LOGIN SCREEN
+        // LOGIN SCREEN (Estética mantida da versão favorita + Firebase + Google)
         const LoginScreen = ({ onLogin, showMessage }) => {
             const [isRegistering, setIsRegistering] = useState(false);
             const [isLoading, setIsLoading] = useState(false);
@@ -179,11 +181,11 @@
 
             const handleRegister = async (e) => {
                 e.preventDefault();
-                if (!passwordRegex.test(regPassword)) { showMessage('Senha fraca. Use letras, números e especiais.', 'error'); return; }
+                if (!passwordRegex.test(regPassword)) { showMessage('Senha deve ter letras, números e especiais.', 'error'); return; }
                 setIsLoading(true);
                 try {
                     const emailSnap = await db.collection('users').where('email', '==', regEmail).get();
-                    if (!emailSnap.empty) { showMessage('Este e-mail já está em uso.', 'error'); setIsLoading(false); return; }
+                    if (!emailSnap.empty) { showMessage('E-mail já está em uso.', 'error'); setIsLoading(false); return; }
                     const codeSnap = await db.collection('users').where('code', '==', regCode).get();
                     if (!codeSnap.empty) { showMessage('Código já em uso.', 'error'); setIsLoading(false); return; }
 
@@ -243,23 +245,56 @@
                             </form>
                         ) : !isRegistering ? (
                             <form onSubmit={handleLogin} className="space-y-4">
-                                <div className="relative"><div className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400"><IconUser/></div><input type="text" value={loginCode} onChange={e => setLoginCode(e.target.value)} disabled={isLoading} className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none text-sm" required placeholder="Seu Código de Vendedor"/></div>
-                                <div className="relative"><div className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400"><IconLock/></div><input type="password" value={password} onChange={e => setPassword(e.target.value)} disabled={isLoading} className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none text-sm" required placeholder="Sua Senha"/></div>
-                                <button type="submit" disabled={isLoading} className="w-full bg-rose-700 hover:bg-rose-800 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all flex justify-center">{isLoading ? <div className="h-5 w-5"><IconLoader2/></div> : 'Entrar no Sistema'}</button>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-700 mb-1">Código de Vendedor</label>
+                                    <div className="relative">
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400"><IconUser/></div>
+                                        <input type="text" value={loginCode} onChange={e => setLoginCode(e.target.value)} disabled={isLoading} className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none transition-all text-sm" required placeholder="Seu ID"/>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-700 mb-1">Senha de Acesso</label>
+                                    <div className="relative">
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400"><IconLock/></div>
+                                        <input type="password" value={password} onChange={e => setPassword(e.target.value)} disabled={isLoading} className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none transition-all text-sm" required placeholder="••••••••"/>
+                                    </div>
+                                </div>
+                                <button type="submit" disabled={isLoading} className="w-full bg-rose-700 hover:bg-rose-800 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-rose-900/30 transition-all flex justify-center items-center gap-2">
+                                    {isLoading ? <div className="h-5 w-5"><IconLoader2/></div> : 'Entrar no Sistema'}
+                                </button>
+                                
                                 <div className="relative flex py-2 items-center"><div className="flex-grow border-t border-slate-300"></div><span className="flex-shrink-0 mx-4 text-slate-400 text-xs font-medium">OU</span><div className="flex-grow border-t border-slate-300"></div></div>
-                                <button type="button" onClick={handleGoogleLoginOnly} disabled={isLoading} className="w-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold py-3 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 text-sm"><div className="h-5 w-5"><IconGoogle/></div> Entrar com Google</button>
-                                <div className="text-center mt-4"><button type="button" onClick={() => setIsRegistering(true)} disabled={isLoading} className="text-sm font-bold text-slate-600 hover:text-rose-700 transition-colors">Não possui acesso? <span className="underline">Cadastrar</span></button></div>
+                                
+                                <button type="button" onClick={handleGoogleLoginOnly} disabled={isLoading} className="w-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold py-3 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 text-sm">
+                                    <div className="h-5 w-5"><IconGoogle/></div> Entrar com Google
+                                </button>
+                                
+                                <div className="text-center mt-4">
+                                    <button type="button" onClick={() => setIsRegistering(true)} disabled={isLoading} className="text-sm font-bold text-slate-600 hover:text-rose-700 transition-colors">
+                                        Não possui acesso? <span className="underline">Cadastrar</span>
+                                    </button>
+                                </div>
                             </form>
                         ) : (
-                            <form onSubmit={handleRegister} className="space-y-3">
-                                <button type="button" onClick={handleGoogleRegisterInit} disabled={isLoading} className="w-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold py-3 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 text-sm mb-2"><div className="h-5 w-5"><IconGoogle/></div> Cadastrar com Google</button>
+                            <form onSubmit={handleRegister} className="space-y-4">
+                                <button type="button" onClick={handleGoogleRegisterInit} disabled={isLoading} className="w-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold py-3 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 text-sm mb-2">
+                                    <div className="h-5 w-5"><IconGoogle/></div> Cadastrar com Google
+                                </button>
                                 <div className="relative flex py-1 items-center"><div className="flex-grow border-t border-slate-300"></div><span className="flex-shrink-0 mx-4 text-slate-400 text-xs font-medium">OU MANUAL</span><div className="flex-grow border-t border-slate-300"></div></div>
-                                <input type="text" value={regName} onChange={e => setRegName(e.target.value)} className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-sm focus:border-rose-500" required placeholder="Nome Completo"/>
-                                <input type="text" value={regCode} onChange={e => setRegCode(e.target.value)} className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-sm focus:border-rose-500" required placeholder="Cód Vendedor (ID)"/>
-                                <input type="email" value={regEmail} onChange={e => setRegEmail(e.target.value)} className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-sm focus:border-rose-500" required placeholder="E-mail Corporativo"/>
-                                <input type="password" value={regPassword} onChange={e => setRegPassword(e.target.value)} className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-sm focus:border-rose-500" required placeholder="Senha (Letras, Núm, Especiais)"/>
-                                <button type="submit" disabled={isLoading} className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 rounded-xl shadow-lg mt-2 flex justify-center">{isLoading ? <div className="h-5 w-5"><IconLoader2/></div> : 'Criar Cadastro'}</button>
-                                <div className="text-center mt-2"><button type="button" onClick={() => setIsRegistering(false)} disabled={isLoading} className="text-sm font-bold text-rose-700 hover:text-rose-800">Voltar para Login</button></div>
+                                
+                                <div><input type="text" value={regName} onChange={e => setRegName(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none transition-all text-sm" required placeholder="Nome Completo"/></div>
+                                <div><input type="text" value={regCode} onChange={e => setRegCode(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none transition-all text-sm" required placeholder="Código Vendedor (ID)"/></div>
+                                <div><input type="email" value={regEmail} onChange={e => setRegEmail(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none transition-all text-sm" required placeholder="E-mail Corporativo"/></div>
+                                <div><input type="password" value={regPassword} onChange={e => setRegPassword(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none transition-all text-sm" required placeholder="Crie uma Senha Forte"/></div>
+                                
+                                <button type="submit" disabled={isLoading} className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 rounded-xl shadow-lg mt-2 flex justify-center items-center gap-2">
+                                    {isLoading ? <div className="h-5 w-5"><IconLoader2/></div> : 'Criar Cadastro'}
+                                </button>
+                                <div className="text-center mt-2">
+                                    <button type="button" onClick={() => setIsRegistering(false)} disabled={isLoading} className="text-sm font-bold text-rose-700 hover:text-rose-800 flex items-center justify-center gap-1 mx-auto w-full py-2">
+                                        Voltar para Login
+                                    </button>
+                                </div>
                             </form>
                         )}
                     </div>
@@ -267,7 +302,7 @@
             );
         };
 
-        // PROFILE & ADMIN SCREEN
+        // ADMIN PROFILE SCREEN
         const ProfileAdminScreen = ({ user, showMessage }) => {
             const [usersList, setUsersList] = useState([]);
             const [loading, setLoading] = useState(false);
@@ -293,8 +328,8 @@
                 <div className="animate-in fade-in space-y-6">
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
                         <div className="flex items-center gap-6 mb-6">
-                            <div className="h-24 w-24 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-3xl shadow-inner border border-rose-200">
-                                {user.avatar ? <img src={user.avatar} className="w-full h-full object-cover rounded-2xl"/> : user.name.charAt(0)}
+                            <div className="h-24 w-24 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-3xl shadow-inner border border-rose-200 overflow-hidden">
+                                {user.avatar ? <img src={user.avatar} className="w-full h-full object-cover"/> : user.name.charAt(0)}
                             </div>
                             <div>
                                 <h2 className="text-2xl font-bold text-slate-800">{user.name}</h2>
@@ -356,18 +391,18 @@
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                         <div className="h-10 w-10 bg-blue-100 text-blue-700 rounded-xl flex items-center justify-center mb-4"><IconUsers/></div>
                         <p className="text-slate-500 font-semibold text-sm">Clientes CRM</p>
-                        <h3 className="text-2xl font-black text-slate-800 mt-1">Ativo</h3>
+                        <h3 className="text-2xl font-black text-slate-800 mt-1">Ativo na Nuvem</h3>
                     </div>
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                         <div className="h-10 w-10 bg-rose-100 text-rose-700 rounded-xl flex items-center justify-center mb-4"><IconFileText/></div>
-                        <p className="text-slate-500 font-semibold text-sm">Leitor de Tabela</p>
-                        <h3 className="text-xl font-bold text-slate-800 mt-1 truncate text-rose-600">Conectado à Nuvem</h3>
+                        <p className="text-slate-500 font-semibold text-sm">Status da Tabela</p>
+                        <h3 className="text-xl font-bold text-slate-800 mt-1 truncate text-rose-600">Sincronizada</h3>
                     </div>
                 </div>
             </div>
         );
 
-        // PDF SCREEN (Inteligência & Nuvem)
+        // PDF SCREEN (Motor aprimorado que não ignora os preços zeros e limpa melhor o texto)
         const PdfScreen = ({ user, products, setProducts, showMessage }) => {
             const [isLoading, setIsLoading] = useState(false);
             const [searchTerm, setSearchTerm] = useState('');
@@ -382,35 +417,65 @@
                     const arrayBuffer = await file.arrayBuffer();
                     const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
                     let extractedProducts = [];
+                    
                     for (let i = 1; i <= pdf.numPages; i++) {
                         const page = await pdf.getPage(i);
                         const textContent = await page.getTextContent();
                         const linesMap = new Map();
+                        
+                        // Agrupa elementos próximos em Y (aumentando a tolerância para pegar preços perdidos)
                         textContent.items.forEach(item => {
-                            const y = Math.round(item.transform[5] / 4) * 4; 
+                            const y = Math.round(item.transform[5] / 6) * 6; 
                             if (!linesMap.has(y)) linesMap.set(y, []); linesMap.get(y).push(item);
                         });
+                        
                         const sortedY = Array.from(linesMap.keys()).sort((a, b) => b - a);
+                        
                         sortedY.forEach(y => {
                             const lineItems = linesMap.get(y).sort((a, b) => a.transform[4] - b.transform[4]);
                             const lineText = lineItems.map(item => item.str).join(' ').replace(/\s+/g, ' ').trim();
+                            
                             const match = lineText.match(/(?:^|\s)(\d{4,7})\s+([A-Z0-9ÇÃÕÁÉÍÓÚÂÊÔ].*)/i);
                             if (match) {
-                                const code = match[1]; let rest = match[2].trim(); let rawPriceStr = null;
-                                rest = rest.replace(/\s+Kg\s*\[L\].*$/i, '').replace(/(?:\s+\d{1,5}[.,]\d{2}){2,}.*$/g, '').replace(/\s+(?:UN|KG|CX|PC|PCT|BD|PLT|FD|KL|KIL|L|K|KgL|Ke|IN|F|Th|M|\[L\])\s*$/gi, '').replace(/[-—.,]+\s*$/, '').trim();
-                                const priceMatches = [...rest.matchAll(/(\d{1,3}(?:\.\d{3})*,\d{2}|\d+,\d{2}|\d+\.\d{2})/g)];
-                                if (priceMatches.length > 0) { rawPriceStr = priceMatches[priceMatches.length - 1][1]; const lastPrice = priceMatches[priceMatches.length - 1][0]; const lastIndex = rest.lastIndexOf(lastPrice); if(lastIndex !== -1) rest = rest.substring(0, lastIndex); }
+                                const code = match[1]; 
+                                let rest = match[2].trim(); 
                                 
-                                const rawPrice = parsePrice(rawPriceStr);
-                                // REGRAS DE PREÇO APLICADAS: Só salva produtos que tenham preço real maior que 0
-                                if (rawPrice !== null && rawPrice > 0) {
-                                    const { hasDiscount, unitFinalPrice } = checkDiscountRules(code, rest, rawPrice);
-                                    extractedProducts.push({ code, name: rest, originalPrice: rawPrice, discountedPrice: unitFinalPrice });
+                                // O grande truque de limpeza: corta fora palavras de peso/caixa que confundiam o buscador de preço
+                                let cleanForPrice = rest
+                                    .replace(/\d+(?:\.\d+)?\s*Kg\/\d+\s*Un/gi, '')
+                                    .replace(/\d+\s*Un/gi, '')
+                                    .replace(/\d+(?:\.\d+)?\s*Kg/gi, '')
+                                    .replace(/\b(?:CX|PC|PCT|BD|PLT|FD|KL|KIL|L|K|KgL|Ke|IN|F|Th|M|\[L\])\b/gi, ' ')
+                                    .trim();
+                                
+                                // Agora procura apenas por moedas reais ou números puros no final
+                                const priceMatches = [...cleanForPrice.matchAll(/(?:R\$?\s*)?(\d{1,3}(?:\.\d{3})*,\d{2}|\d+,\d{2}|\d+\.\d{2})/g)];
+                                
+                                let rawPriceStr = null;
+                                if (priceMatches.length > 0) { 
+                                    // Pega a última correspondência, que costuma ser o preço final do item na linha
+                                    rawPriceStr = priceMatches[priceMatches.length - 1][1]; 
                                 }
+
+                                const rawPrice = parsePrice(rawPriceStr) || 0; // Se não achar, fica zero
+                                
+                                // Limpa o nome do produto para o visual final
+                                let finalName = rest.replace(/\s+Kg\s*\[L\].*$/i, '').trim();
+
+                                const { hasDiscount, unitFinalPrice } = checkDiscountRules(code, finalName, rawPrice);
+                                
+                                // Adiciona TUDO, mesmo se o preço for zero (atendendo ao seu pedido explícito)
+                                extractedProducts.push({ 
+                                    code, 
+                                    name: finalName, 
+                                    originalPrice: rawPrice, 
+                                    discountedPrice: unitFinalPrice 
+                                });
                             }
                         });
                     }
-                    setProducts(extractedProducts); showMessage(`Sucesso! ${extractedProducts.length} produtos válidos lidos.`, 'success');
+                    setProducts(extractedProducts); 
+                    showMessage(`Sucesso! ${extractedProducts.length} produtos carregados (Incluindo os sem preço na linha).`, 'success');
                 } catch (err) { showMessage('Erro ao processar PDF.', 'error'); } finally { setIsLoading(false); }
             };
 
@@ -453,7 +518,7 @@
                     <header className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row items-center justify-between gap-4">
                         <div>
                             <h1 className="text-2xl font-bold text-rose-800 flex items-center gap-2"><div className="h-6 w-6"><IconFileText /></div> Tabela de Preços</h1>
-                            <p className="text-slate-500 text-sm mt-1">Sincronizada automaticamente no seu dispositivo.</p>
+                            <p className="text-slate-500 text-sm mt-1">Sincronizada automaticamente e salva localmente.</p>
                         </div>
                         
                         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
@@ -481,7 +546,14 @@
                                 <table className="w-full text-left border-collapse">
                                     <thead className="bg-white sticky top-0 shadow-sm"><tr><th className="p-4 font-bold text-slate-600 border-b">Cód</th><th className="p-4 font-bold text-slate-600 border-b">Produto</th><th className="p-4 font-bold text-slate-600 border-b text-right">Orig.</th><th className="p-4 font-bold text-rose-700 border-b bg-rose-50 text-right">À Vista (-3%)</th></tr></thead>
                                     <tbody>
-                                        {filteredProducts.map((p, i) => (<tr key={i} className="hover:bg-slate-50 border-b border-slate-50"><td className="p-4 text-slate-500 font-bold">{p.code}</td><td className="p-4 text-slate-800 font-medium">{p.name}</td><td className="p-4 text-right text-slate-600">{formatPrice(p.originalPrice)}</td><td className="p-4 text-right font-bold text-rose-700 bg-rose-50/30">{formatPrice(p.discountedPrice)}</td></tr>))}
+                                        {filteredProducts.map((p, i) => (
+                                            <tr key={i} className="hover:bg-slate-50 border-b border-slate-50">
+                                                <td className="p-4 text-slate-500 font-bold">{p.code}</td>
+                                                <td className="p-4 text-slate-800 font-medium">{p.name}</td>
+                                                <td className="p-4 text-right text-slate-600">{formatPrice(p.originalPrice)}</td>
+                                                <td className="p-4 text-right font-bold text-rose-700 bg-rose-50/30">{formatPrice(p.discountedPrice)}</td>
+                                            </tr>
+                                        ))}
                                     </tbody>
                                 </table>
                             </div>
@@ -491,7 +563,7 @@
             );
         };
 
-        // RESUMO SCREEN (Inteligência)
+        // RESUMO SCREEN (Inteligência Extrator)
         const ResumoScreen = ({ products, showMessage }) => {
             const [orderText, setOrderText] = useState('');
             const [showModal, setShowModal] = useState(false);
@@ -502,7 +574,7 @@
 
             const handleProcessText = () => {
                 if (products.length === 0) { showMessage('Importe ou Baixe a Tabela primeiro!', 'error'); return; }
-                if (!orderText.trim()) { showMessage('Cole o texto.', 'error'); return; }
+                if (!orderText.trim()) { showMessage('Cole o texto do pedido.', 'error'); return; }
                 try {
                     let customerName = '', spamov = '';
                     const spMatch = orderText.match(/SPAmov[:\-\s]*(\d+)/i); if (spMatch) spamov = spMatch[1];
@@ -574,7 +646,7 @@
             );
         };
 
-        // ORÇAMENTOS SCREEN (Inteligência)
+        // ORÇAMENTOS ZAP SCREEN
         const OrcamentosScreen = ({ products, showMessage }) => {
             const [search, setSearch] = useState(''); const [selectedCodes, setSelectedCodes] = useState(new Set());
             const filtered = useMemo(() => { if (!search.trim()) return []; const norm = normalizeForSearch(search); return products.filter(p => normalizeForSearch(p.name).includes(norm) || p.code.includes(norm)); }, [products, search]);
@@ -585,8 +657,8 @@
                 products.filter(p => selectedCodes.has(p.code)).forEach(p => {
                     const { hasDiscount, origPrice, unitFinalPrice } = checkDiscountRules(p.code, p.name, p.originalPrice);
                     txt += `Cod: ${p.code}\n\n${p.name}\n`;
-                    if(hasDiscount) txt += `💰 Valor: ~${formatPrice(origPrice)}~ por *${formatPrice(unitFinalPrice)}/kg* 🔥 (-3%)\n\n`;
-                    else txt += `💰 Valor: *${formatPrice(origPrice)}/kg*\n\n`;
+                    if(hasDiscount) txt += `💰 Valor: ~${formatPrice(origPrice)}~ por *${formatPrice(unitFinalPrice)}* 🔥 (-3%)\n\n`;
+                    else txt += `💰 Valor: *${formatPrice(origPrice)}*\n\n`;
                 }); return txt.trim();
             };
             return (
@@ -602,7 +674,7 @@
             );
         };
 
-        // CLIENTS SCREEN (CRM - Salvando no Firestore)
+        // CLIENTS CRM SCREEN
         const LikertScale = ({ question, value, onChange }) => (
             <div className="mb-4 bg-white p-4 rounded-xl border border-slate-200 hover:border-rose-300 transition-colors shadow-sm"><p className="font-semibold text-slate-700 mb-3 text-sm">{question}</p><div className="flex items-center justify-between gap-2"><span className="text-[10px] sm:text-xs text-slate-400 font-bold uppercase">1 - Não</span><div className="flex gap-1.5 sm:gap-3">{[1, 2, 3, 4, 5].map(num => (<button key={num} type="button" onClick={() => onChange(num)} className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition-all border-2 ${value === num ? 'bg-rose-700 border-rose-700 text-white shadow-md transform scale-110' : 'bg-slate-50 border-slate-300 text-slate-500 hover:border-rose-400 hover:bg-rose-50'}`}>{num}</button>))}</div><span className="text-[10px] sm:text-xs text-slate-400 font-bold uppercase">5 - Sim</span></div></div>
         );
@@ -624,9 +696,9 @@
                 const acougueScore = data.q1 + data.q2 + data.q4 + data.q9 + data.q11 + data.q18; const mercadoScore = data.q5 + data.q6 + data.q8 + data.q12 + data.q13 + data.q15 + data.q20; const restauranteScore = data.q3 + data.q7 + data.q10 + data.q14 + data.q16;
                 const pAcougue = acougueScore / 30, pMercado = mercadoScore / 35, pRestaurante = restauranteScore / 25; const maxScore = Math.max(pAcougue, pMercado, pRestaurante);
                 if (maxScore === 0) return { title: "Cadastro Inicial", color: "bg-slate-100 text-slate-600" };
-                if (maxScore === pAcougue) return { title: data.q2 >= 4 ? "Açougue Bruto (Osso)" : "Açougue Padrão", color: "bg-red-100 text-red-800" };
-                if (maxScore === pMercado) return { title: "Mercado / Mercearia", color: "bg-blue-100 text-blue-800" };
-                return { title: "Restaurante / Food Service", color: "bg-orange-100 text-orange-800" };
+                if (maxScore === pAcougue) return { title: data.q2 >= 4 ? "Açougue Bruto (Osso)" : "Açougue Padrão", color: "bg-red-100 text-red-800 border border-red-200" };
+                if (maxScore === pMercado) return { title: "Mercado / Mercearia", color: "bg-blue-100 text-blue-800 border border-blue-200" };
+                return { title: "Restaurante / Food Service", color: "bg-orange-100 text-orange-800 border border-orange-200" };
             };
 
             const handleSave = async (e) => {
@@ -639,33 +711,47 @@
             if (isAdding) return (
                 <div className="animate-in fade-in">
                     <div className="flex justify-between items-center mb-6"><h2 className="text-2xl font-bold text-slate-800">Novo Cliente Inteligente</h2><button onClick={() => setIsAdding(false)} className="text-slate-500 font-medium px-4 py-2 bg-slate-200 rounded-lg">Voltar</button></div>
-                    <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6"><form onSubmit={handleSave}><div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8"><div><label className="block text-xs font-bold text-slate-500 mb-1">Nome Fantasia</label><input type="text" required value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value})} className="w-full p-3 bg-slate-50 border rounded-lg"/></div><div><label className="block text-xs font-bold text-slate-500 mb-1">Código SPAmov</label><input type="text" required value={formData.code} onChange={e=>setFormData({...formData, code: e.target.value})} className="w-full p-3 bg-slate-50 border rounded-lg"/></div><div><label className="block text-xs font-bold text-slate-500 mb-1">Telefone</label><input type="text" required value={formData.phone} onChange={e=>setFormData({...formData, phone: e.target.value})} className="w-full p-3 bg-slate-50 border rounded-lg"/></div><div><label className="block text-xs font-bold text-slate-500 mb-1">Endereço</label><input type="text" required value={formData.address} onChange={e=>setFormData({...formData, address: e.target.value})} className="w-full p-3 bg-slate-50 border rounded-lg"/></div></div><div className="bg-rose-50 rounded-xl p-4 mb-6 border border-rose-100"><h3 className="text-lg font-bold text-rose-800">Mapeamento de Perfil (IA)</h3></div><div className="grid grid-cols-1 xl:grid-cols-2 gap-x-6">{questionsDefinition.map((q) => (<LikertScale key={q.id} question={q.text} value={formData[q.id]} onChange={(val) => setFormData({...formData, [q.id]: val})} />))}</div><div className="mt-8 flex justify-end"><button type="submit" className="bg-rose-700 text-white font-bold py-4 px-10 rounded-xl shadow-lg">Salvar Cliente</button></div></form></div>
+                    <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6"><form onSubmit={handleSave}><div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8"><div><label className="block text-xs font-bold text-slate-500 mb-1">Nome Fantasia</label><input type="text" required value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value})} className="w-full p-3 bg-slate-50 border rounded-lg outline-none focus:border-rose-500"/></div><div><label className="block text-xs font-bold text-slate-500 mb-1">Código SPAmov</label><input type="text" required value={formData.code} onChange={e=>setFormData({...formData, code: e.target.value})} className="w-full p-3 bg-slate-50 border rounded-lg outline-none focus:border-rose-500"/></div><div><label className="block text-xs font-bold text-slate-500 mb-1">Telefone</label><input type="text" required value={formData.phone} onChange={e=>setFormData({...formData, phone: e.target.value})} className="w-full p-3 bg-slate-50 border rounded-lg outline-none focus:border-rose-500"/></div><div><label className="block text-xs font-bold text-slate-500 mb-1">Endereço</label><input type="text" required value={formData.address} onChange={e=>setFormData({...formData, address: e.target.value})} className="w-full p-3 bg-slate-50 border rounded-lg outline-none focus:border-rose-500"/></div></div><div className="bg-rose-50 rounded-xl p-4 mb-6 border border-rose-100"><h3 className="text-lg font-bold text-rose-800">Mapeamento de Perfil (CRM Inteligente)</h3></div><div className="grid grid-cols-1 xl:grid-cols-2 gap-x-6">{questionsDefinition.map((q) => (<LikertScale key={q.id} question={q.text} value={formData[q.id]} onChange={(val) => setFormData({...formData, [q.id]: val})} />))}</div><div className="mt-8 pt-6 border-t border-slate-200 flex justify-end"><button type="submit" className="bg-rose-700 text-white font-bold py-4 px-10 rounded-xl shadow-lg flex items-center gap-2"><div className="h-5 w-5"><IconCheck/></div> Salvar Cliente</button></div></form></div>
                 </div>
             );
 
             return (
                 <div className="animate-in fade-in">
-                    <div className="flex justify-between items-center mb-6"><div><h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2"><div className="h-6 w-6 text-rose-700"><IconUsers/></div>CRM & Rotas</h2><p className="text-slate-500 text-sm">Sincronizado na Nuvem</p></div><button onClick={() => setIsAdding(true)} className="bg-rose-700 text-white font-bold py-2.5 px-5 rounded-xl shadow-md flex items-center gap-2"><div className="h-5 w-5"><IconPlus/></div> Novo</button></div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">{clients.map(c => (<div key={c.id} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 relative overflow-hidden flex flex-col"><div className="absolute top-0 left-0 w-2 h-full bg-rose-700"></div><div className="ml-2 flex-1"><h4 className="font-bold text-lg text-slate-800 mb-2">{c.name}</h4><span className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-4 ${c.profile?.color}`}>{c.profile?.title}</span><div className="space-y-2 text-sm text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100"><p><b>SPA:</b> {c.code}</p><p><b>TEL:</b> {c.phone}</p><p className="truncate"><b>END:</b> {c.address}</p></div></div></div>))}</div>
+                    <div className="flex justify-between items-center mb-6"><div><h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2"><div className="h-6 w-6 text-rose-700"><IconUsers/></div>CRM & Rotas</h2><p className="text-slate-500 text-sm">Base de dados classificada pela IA.</p></div><button onClick={() => setIsAdding(true)} className="bg-rose-700 text-white font-bold py-2.5 px-5 rounded-xl shadow-md flex items-center gap-2"><div className="h-5 w-5"><IconPlus/></div> Novo Cliente</button></div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">{clients.map(c => (<div key={c.id} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 relative overflow-hidden flex flex-col hover:shadow-md hover:border-rose-300 transition-all"><div className="absolute top-0 left-0 w-2 h-full bg-rose-700"></div><div className="ml-2 flex-1"><h4 className="font-bold text-lg text-slate-800 mb-2">{c.name}</h4><span className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-4 ${c.profile?.color}`}>{c.profile?.title}</span><div className="space-y-2 text-sm text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100"><p><b>SPA:</b> {c.code}</p><p><b>TEL:</b> {c.phone}</p><p className="truncate"><b>END:</b> {c.address}</p></div></div></div>))}</div>
                 </div>
             );
         };
 
         // SUPPORT & CREDITS
-        const SupportScreen = ({ user }) => (
-            <div className="animate-in fade-in max-w-3xl mx-auto"><div className="text-center mb-8"><div className="h-16 w-16 bg-rose-100 text-rose-700 rounded-full flex items-center justify-center mx-auto mb-4"><div className="h-8 w-8"><IconSupport/></div></div><h2 className="text-3xl font-bold text-slate-800">Suporte Técnico</h2></div><div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8"><form className="space-y-6"><div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div><label className="block text-sm font-bold text-slate-700 mb-1">Solicitante</label><input type="text" value={user.name} disabled className="w-full p-3 bg-slate-100 rounded-xl"/></div><div><label className="block text-sm font-bold text-slate-700 mb-1">E-mail</label><input type="email" value={user.email} disabled className="w-full p-3 bg-slate-100 rounded-xl"/></div></div><div><label className="block text-sm font-bold text-slate-700 mb-1">Assunto</label><select className="w-full p-3 bg-slate-50 border rounded-xl"><option>Reportar Erro</option><option>Dúvida</option></select></div><button type="button" className="w-full bg-rose-700 text-white font-bold py-4 rounded-xl shadow-lg">Enviar Chamado</button></form></div></div>
-        );
+        const SupportScreen = ({ user }) => {
+            const [submitted, setSubmitted] = useState(false);
+            const handleSubmit = (e) => { e.preventDefault(); setSubmitted(true); setTimeout(() => setSubmitted(false), 5000); };
+            return (
+                <div className="animate-in fade-in max-w-3xl mx-auto">
+                    <div className="text-center mb-8"><div className="h-16 w-16 bg-rose-100 text-rose-700 rounded-full flex items-center justify-center mx-auto mb-4"><div className="h-8 w-8"><IconSupport/></div></div><h2 className="text-3xl font-bold text-slate-800">Suporte Técnico</h2></div>
+                    <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
+                        {submitted ? (
+                            <div className="text-center py-12"><div className="h-16 w-16 text-emerald-500 mx-auto mb-4"><IconCheck/></div><h3 className="text-2xl font-bold text-slate-800 mb-2">Chamado Enviado!</h3></div>
+                        ) : (
+                            <form onSubmit={handleSubmit} className="space-y-6"><div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div><label className="block text-sm font-bold text-slate-700 mb-1">Solicitante</label><input type="text" value={user.name} disabled className="w-full p-3 bg-slate-100 rounded-xl"/></div><div><label className="block text-sm font-bold text-slate-700 mb-1">E-mail</label><input type="email" value={user.email} disabled className="w-full p-3 bg-slate-100 rounded-xl"/></div></div><div><label className="block text-sm font-bold text-slate-700 mb-1">Assunto</label><select className="w-full p-3 bg-slate-50 border rounded-xl"><option>Reportar Erro</option><option>Dúvida</option></select></div><button type="submit" className="w-full bg-rose-700 text-white font-bold py-4 rounded-xl shadow-lg">Enviar Chamado</button></form>
+                        )}
+                    </div>
+                </div>
+            );
+        };
         const CreditsScreen = () => (
-            <div className="animate-in fade-in flex items-center justify-center min-h-[70vh]"><div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden max-w-lg w-full text-center relative"><div className="h-32 bg-slate-900 relative overflow-hidden"><img src={BG_IMAGE} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay" /></div><div className="px-8 pb-8 relative"><div className="w-24 h-24 bg-white rounded-2xl shadow-lg border-4 border-white mx-auto -mt-12 mb-4 overflow-hidden relative z-10 flex items-center justify-center"><FrigansoLogo className="w-16 h-16 object-contain" /></div><h2 className="text-2xl font-black text-slate-800 mb-1">Sistema Friganso Premium ERP</h2><p className="text-slate-500 font-medium mb-6">Versão Cloud - Inteligência & CRM</p><div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-left mb-6"><p className="text-sm text-slate-500 mb-1 uppercase tracking-wider font-bold">Desenvolvedor</p><p className="text-lg font-bold text-rose-800 mb-4">Bruno Moura</p><p className="text-sm text-slate-500 mb-1 uppercase tracking-wider font-bold">Contato Direto</p><a href="mailto:bruno.moura.f.silva@gmail.com" className="text-blue-600 font-medium flex items-center gap-2"><div className="h-4 w-4"><IconMail/></div> bruno.moura.f.silva@gmail.com</a></div></div></div></div>
+            <div className="animate-in fade-in flex items-center justify-center min-h-[70vh]"><div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden max-w-lg w-full text-center relative"><div className="h-32 bg-slate-900 relative overflow-hidden"><img src={BG_IMAGE} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay" /></div><div className="px-8 pb-8 relative"><div className="w-24 h-24 bg-white rounded-2xl shadow-lg border-4 border-white mx-auto -mt-12 mb-4 overflow-hidden relative z-10 flex items-center justify-center"><FrigansoLogo className="w-16 h-16 object-contain" /></div><h2 className="text-2xl font-black text-slate-800 mb-1">Sistema Friganso Premium ERP</h2><p className="text-slate-500 font-medium mb-6">Versão Cloud - Inteligência & CRM</p><div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-left mb-6"><p className="text-sm text-slate-500 mb-1 uppercase tracking-wider font-bold">Desenvolvedor e Arquiteto</p><p className="text-lg font-bold text-rose-800 mb-4">Bruno Moura</p><p className="text-sm text-slate-500 mb-1 uppercase tracking-wider font-bold">Contato Direto</p><a href="mailto:bruno.moura.f.silva@gmail.com" className="text-blue-600 font-medium flex items-center gap-2"><div className="h-4 w-4"><IconMail/></div> bruno.moura.f.silva@gmail.com</a></div></div></div></div>
         );
 
+        // APLICATIVO PRINCIPAL (Montagem)
         const App = () => {
             const [user, setUser] = useState(() => { const s = window.localStorage.getItem('friganso_loggedUser'); return s ? JSON.parse(s) : null; });
             const [activeRoute, setActiveRoute] = useState('dashboard');
             const [isSidebarOpen, setIsSidebarOpen] = useState(false);
             const [messageBox, setMessageBox] = useState(null);
             
-            // PERSISTÊNCIA: A tabela lida fica guardada no navegador (não some no F5)
+            // PERSISTÊNCIA DA TABELA: O navegador guarda a última leitura do PDF!
             const [products, setProductsState] = useState(() => {
                 const savedProds = window.localStorage.getItem('friganso_products');
                 return savedProds ? JSON.parse(savedProds) : [];
@@ -730,7 +816,7 @@
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-4 space-y-1">
+                        <div className="flex-1 overflow-y-auto p-4 space-y-1 scrollbar-hide">
                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 mt-2 ml-2">Gestão Principal</p>
                             <NavButton route="dashboard" icon={IconDashboard} label="Painel (Dashboard)" />
                             <NavButton route="clients" icon={IconUsers} label="CRM & Rotas" />
@@ -743,20 +829,20 @@
                             
                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 mt-8 ml-2">Sistema & Ajuda</p>
                             <NavButton route="support" icon={IconSupport} label="Suporte Técnico" />
-                            <NavButton route="credits" icon={IconCode} label="Desenvolvedor" />
+                            <NavButton route="credits" icon={IconCode} label="Sobre o Desenvolvedor" />
                         </div>
 
                         <div className="p-4 border-t border-slate-800 bg-slate-900/50">
                             <div className="p-3 rounded-xl mb-2 flex items-center gap-3 bg-slate-900 border border-slate-800 cursor-pointer hover:border-rose-700/50 transition-colors" onClick={() => setActiveRoute('profile')}>
-                                <div className="h-10 w-10 rounded-xl bg-rose-800 text-white flex items-center justify-center font-bold text-sm shadow-md overflow-hidden">
+                                <div className="h-10 w-10 rounded-xl bg-rose-800 text-white flex items-center justify-center font-bold text-sm shadow-md overflow-hidden border border-rose-600">
                                     {user.avatar ? <img src={user.avatar} className="w-full h-full object-cover"/> : user.name.charAt(0)}
                                 </div>
                                 <div className="flex-1 overflow-hidden">
                                     <p className="text-sm font-bold text-white truncate">{user.name}</p>
-                                    <p className="text-[10px] text-slate-400 truncate uppercase tracking-wider font-bold">ID: {user.code} • {user.role}</p>
+                                    <p className="text-[10px] text-slate-400 truncate uppercase tracking-wider font-bold">CÓD: {user.code} • {user.role}</p>
                                 </div>
                             </div>
-                            <button onClick={() => handleSetUser(null)} className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors">
+                            <button onClick={() => handleSetUser(null)} className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-colors border border-transparent hover:border-red-400/20">
                                 <div className="h-4 w-4"><IconLogOut/></div> Sair da Conta
                             </button>
                         </div>
