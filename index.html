@@ -36,15 +36,14 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo, useRef } = React;
 
-        // CONFIGURAÇÃO DO FIREBASE (Sua API Key Real)
         const firebaseConfig = {
-            apiKey: "AIzaSyDaQ-WDQnGi-t5mCvL6rXAWLgO4gxW_j7Y",
-            authDomain: "frigansoerm.firebaseapp.com",
-            projectId: "frigansoerm",
-            storageBucket: "frigansoerm.firebasestorage.app",
-            messagingSenderId: "13332928407",
-            appId: "1:13332928407:web:b3b51d1b825c560b9016d2",
-            measurementId: "G-963SW3XSYM"
+            apiKey: atob("QUl6YVN5RGFRLVdEUW5HaS10NW1Ddkw2clhBV0xnTzRneFdfajdZ"),
+            authDomain: atob("ZnJpZ2Fuc29lcm0uZmlyZWJhc2VhcHAuY29t"),
+            projectId: atob("ZnJpZ2Fuc29lcm0="),
+            storageBucket: atob("ZnJpZ2Fuc29lcm0uZmlyZWJhc2VzdG9yYWdlLmFwcA=="),
+            messagingSenderId: atob("MTMzMzI5Mjg0MDc="),
+            appId: atob("MToxMzMzMjkyODQwNzp3ZWI6YjNiNTFkMWI4MjVjNTYwYjkwMTZkMg=="),
+            measurementId: atob("Ry05NjNTVzNYU1lN")
         };
         
         if (!firebase.apps.length) {
@@ -53,7 +52,6 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // Criptografia SHA-256 para senhas seguras
         const hashPassword = async (password) => {
             if (!password) return '';
             const msgBuffer = new TextEncoder().encode(password);
@@ -62,25 +60,17 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         };
 
-        // LOGO GERADA POR CÓDIGO (Sempre visível)
         const FrigansoLogo = ({ className }) => (
             <svg className={className} viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <linearGradient id="roseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#e11d48" />
-                        <stop offset="100%" stopColor="#881337" />
-                    </linearGradient>
-                </defs>
+                <defs><linearGradient id="roseGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#e11d48" /><stop offset="100%" stopColor="#881337" /></linearGradient></defs>
                 <path d="M100 10 L180 50 L180 140 L100 190 L20 140 L20 50 Z" fill="url(#roseGrad)" />
                 <path d="M100 30 L160 60 L160 130 L100 165 L40 130 L40 60 Z" fill="#0f172a" />
                 <path d="M85 70 L125 70 L125 85 L100 85 L100 100 L120 100 L120 115 L100 115 L100 140 L85 140 Z" fill="#ffffff" />
             </svg>
         );
 
-        // IMAGEM DE FUNDO PREMIUM (Unsplash Direto)
         const BG_IMAGE = "https://images.unsplash.com/photo-1607623814075-e51df1bd682f?q=80&w=2000&auto=format&fit=crop";
 
-        // ICONS
         const IconUser = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
         const IconLock = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>;
         const IconDashboard = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>;
@@ -100,29 +90,48 @@
         const IconTag = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>;
         const IconLoader2 = () => <svg className="w-full h-full animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>;
         const IconX = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
-        const IconSettings = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
+        const IconSettings = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h-.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
         const IconCloudDownload = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/><polyline points="8 12 12 16 16 12"/><line x1="12" y1="8" x2="12" y2="16"/></svg>;
         const IconCloudUpload = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/><polyline points="16 12 12 8 8 12"/><line x1="12" y1="16" x2="12" y2="8"/></svg>;
-        const IconGoogle = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>;
         const IconHistory = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
         const IconWand = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8l1.4 1.4"/><path d="M17.8 6.2l1.4-1.4"/><path d="M12.2 6.2l-1.4-1.4"/><path d="M12.2 11.8l-1.4 1.4"/><path d="M2.5 21.5l14-14"/></svg>;
+        const IconGoogle = () => <svg className="w-full h-full" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>;
 
-        const useLocalStorage = (key, initialValue) => {
-            const [storedValue, setStoredValue] = useState(() => {
-                try {
-                    const item = window.localStorage.getItem(key);
-                    return item ? JSON.parse(item) : initialValue;
-                } catch (error) { return initialValue; }
-            });
-            const setValue = (value) => {
-                try {
-                    const valueToStore = value instanceof Function ? value(storedValue) : value;
-                    setStoredValue(valueToStore);
-                    window.localStorage.setItem(key, JSON.stringify(valueToStore));
-                } catch (error) { console.error(error); }
-            };
-            return [storedValue, setValue];
+        const normalizeForSearch = (str) => {
+            if (!str) return '';
+            let s = str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
+            s = s.replace(/\bcong\.?\b/g, "congelado").replace(/\b(resf|ref)\.?\b/g, "resfriado").replace(/[-_./]/g, " ").replace(/\s+/g, " ").trim();
+            return s;
         };
+        const parsePrice = (priceStr) => {
+            if (!priceStr) return null;
+            let cleanStr = priceStr.includes('.') && priceStr.includes(',') ? priceStr.replace(/\./g, '').replace(',', '.') : priceStr.replace(',', '.');
+            const val = parseFloat(cleanStr); return isNaN(val) ? null : val;
+        };
+        const formatPrice = (value) => {
+            if (value === null || value === undefined) return 'R$ 0,00';
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2 });
+        };
+        const checkDiscountRules = (code, name, originalPrice) => {
+            const codeStr = (code || '').toString().trim(), nameStr = (name || '').toLowerCase().trim(), origPrice = parseFloat(originalPrice) || 0;
+            let hasDiscount = true;
+            if (codeStr.startsWith('16') || codeStr.startsWith('27') || codeStr.startsWith('90')) hasDiscount = false;
+            if (nameStr.includes('fraldinha ramax')) hasDiscount = false;
+            return { hasDiscount, origPrice, unitFinalPrice: hasDiscount ? Math.round((origPrice * 0.97) * 100) / 100 : origPrice };
+        };
+
+        const CustomMessageBox = ({ message, type = 'info', onClose }) => (
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100] animate-in fade-in">
+                <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 flex flex-col items-center text-center zoom-in-95 animate-in">
+                    <div className={`h-16 w-16 rounded-full flex items-center justify-center mb-4 ${type === 'error' ? 'bg-red-100 text-red-600' : type === 'success' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
+                        {type === 'error' ? <IconX /> : <IconCheck />}
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-800 mb-2">{type === 'error' ? 'Atenção' : type === 'success' ? 'Sucesso' : 'Aviso'}</h3>
+                    <p className="text-slate-600 text-sm mb-6">{message}</p>
+                    <button onClick={onClose} className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition-colors">Entendi</button>
+                </div>
+            </div>
+        );
 
         const LoginScreen = ({ onLogin, showMessage }) => {
             const [isRegistering, setIsRegistering] = useState(false);
@@ -148,6 +157,7 @@
                         snapshot = await db.collection('users').where('code', '==', loginCode).where('password', '==', password).get();
                         if (!snapshot.empty) await db.collection('users').doc(snapshot.docs[0].id).update({ password: hashedPass });
                     }
+
                     if (!snapshot.empty) {
                         const userDoc = snapshot.docs[0].data();
                         if (userDoc.code === '99206' && userDoc.role !== 'admin') {
@@ -176,11 +186,11 @@
 
             const handleRegister = async (e) => {
                 e.preventDefault();
-                if (!passwordRegex.test(regPassword)) { showMessage('Senha fraca. Use letras, números e especiais.', 'error'); return; }
+                if (!passwordRegex.test(regPassword)) { showMessage('Senha deve ter letras, números e especiais.', 'error'); return; }
                 setIsLoading(true);
                 try {
                     const emailSnap = await db.collection('users').where('email', '==', regEmail).get();
-                    if (!emailSnap.empty) { showMessage('Este e-mail já está em uso.', 'error'); setIsLoading(false); return; }
+                    if (!emailSnap.empty) { showMessage('E-mail já está em uso.', 'error'); setIsLoading(false); return; }
                     const codeSnap = await db.collection('users').where('code', '==', regCode).get();
                     if (!codeSnap.empty) { showMessage('Código já em uso.', 'error'); setIsLoading(false); return; }
 
@@ -236,12 +246,12 @@
                                     <p className="text-slate-800 text-sm">Olá, <span className="font-bold">{pendingGoogleUser.displayName}</span>!</p>
                                     <p className="text-slate-500 text-xs mt-1">Defina seu código de vendedor (ID):</p>
                                 </div>
-                                <div className="relative"><div className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400"><IconUser/></div><input type="text" value={googleCode} onChange={e => setgoogleCode(e.target.value)} disabled={isLoading} className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none text-sm" required placeholder="Seu Código Único (Ex: 99206)"/></div>
+                                <div className="relative"><div className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400"><IconUser/></div><input type="text" value={googleCode} onChange={e => setGoogleCode(e.target.value)} disabled={isLoading} className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none text-sm" required placeholder="Seu Código Único (Ex: 99206)"/></div>
                                 <button type="submit" disabled={isLoading} className="w-full bg-rose-700 hover:bg-rose-800 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all flex justify-center">{isLoading ? <div className="h-5 w-5"><IconLoader2/></div> : 'Finalizar Cadastro'}</button>
                             </form>
                         ) : !isRegistering ? (
                             <form onSubmit={handleLogin} className="space-y-4">
-                                <div className="relative"><div className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400"><IconUser/></div><input type="text" value={loginCode} onChange={e => setLoginCode(e.target.value)} disabled={isLoading} className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none text-sm" required placeholder="Seu ID do Vendedor"/></div>
+                                <div className="relative"><div className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400"><IconUser/></div><input type="text" value={loginCode} onChange={e => setLoginCode(e.target.value)} disabled={isLoading} className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none text-sm" required placeholder="Seu Código de Vendedor"/></div>
                                 <div className="relative"><div className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400"><IconLock/></div><input type="password" value={password} onChange={e => setPassword(e.target.value)} disabled={isLoading} className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none text-sm" required placeholder="Sua Senha"/></div>
                                 <button type="submit" disabled={isLoading} className="w-full bg-rose-700 hover:bg-rose-800 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all flex justify-center">{isLoading ? <div className="h-5 w-5"><IconLoader2/></div> : 'Entrar no Sistema'}</button>
                                 <div className="relative flex py-2 items-center"><div className="flex-grow border-t border-slate-300"></div><span className="flex-shrink-0 mx-4 text-slate-400 text-xs font-medium">OU</span><div className="flex-grow border-t border-slate-300"></div></div>
@@ -265,7 +275,6 @@
             );
         };
 
-        // PROFILE & ADMIN SCREEN
         const ProfileAdminScreen = ({ user, showMessage }) => {
             const [usersList, setUsersList] = useState([]);
             const [loading, setLoading] = useState(false);
@@ -334,7 +343,6 @@
             );
         };
 
-        // DASHBOARD SCREEN
         const DashboardScreen = ({ user }) => (
             <div className="animate-in fade-in space-y-6">
                 <div className="bg-slate-900 rounded-3xl p-8 text-white relative overflow-hidden shadow-xl border border-slate-800">
@@ -365,7 +373,6 @@
             </div>
         );
 
-        // PDF SCREEN (Atualizado com Data e Histórico de Arquivos)
         const PdfScreen = ({ user, products, setProducts, showMessage }) => {
             const [isLoading, setIsLoading] = useState(false);
             const [searchTerm, setSearchTerm] = useState('');
@@ -382,9 +389,7 @@
                     if(doc.exists) {
                         const data = doc.data();
                         const date = data.updatedAt ? data.updatedAt.toDate() : new Date();
-                        setCloudInfo({
-                            date: date.toLocaleDateString('pt-BR') + ' às ' + date.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
-                        });
+                        setCloudInfo({ date: date.toLocaleDateString('pt-BR') + ' às ' + date.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}) });
                     }
                 } catch(e) { console.error(e) }
             };
@@ -397,34 +402,53 @@
                     const arrayBuffer = await file.arrayBuffer();
                     const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
                     let extractedProducts = [];
+                    
                     for (let i = 1; i <= pdf.numPages; i++) {
                         const page = await pdf.getPage(i);
                         const textContent = await page.getTextContent();
                         const linesMap = new Map();
+                        
                         textContent.items.forEach(item => {
                             const y = Math.round(item.transform[5] / 6) * 6; 
                             if (!linesMap.has(y)) linesMap.set(y, []); linesMap.get(y).push(item);
                         });
+                        
                         const sortedY = Array.from(linesMap.keys()).sort((a, b) => b - a);
+                        
                         sortedY.forEach(y => {
                             const lineItems = linesMap.get(y).sort((a, b) => a.transform[4] - b.transform[4]);
                             const lineText = lineItems.map(item => item.str).join(' ').replace(/\s+/g, ' ').trim();
+                            
                             const match = lineText.match(/(?:^|\s)(\d{4,7})\s+([A-Z0-9ÇÃÕÁÉÍÓÚÂÊÔ].*)/i);
                             if (match) {
-                                const code = match[1]; let rest = match[2].trim(); let rawPriceStr = null;
-                                rest = rest.replace(/\s+Kg\s*\[L\].*$/i, '').replace(/(?:\s+\d{1,5}[.,]\d{2}){2,}.*$/g, '').replace(/\s+(?:UN|KG|CX|PC|PCT|BD|PLT|FD|KL|KIL|L|K|KgL|Ke|IN|F|Th|M|\[L\])\s*$/gi, '').replace(/[-—.,]+\s*$/, '').trim();
-                                const priceMatches = [...rest.matchAll(/(\d{1,3}(?:\.\d{3})*,\d{2}|\d+,\d{2}|\d+\.\d{2})/g)];
-                                if (priceMatches.length > 0) { rawPriceStr = priceMatches[priceMatches.length - 1][1]; const lastPrice = priceMatches[priceMatches.length - 1][0]; const lastIndex = rest.lastIndexOf(lastPrice); if(lastIndex !== -1) rest = rest.substring(0, lastIndex); }
+                                const code = match[1]; 
+                                let rest = match[2].trim(); 
                                 
+                                // O grande truque de limpeza de preço: achar o último número com vírgula de verdade!
+                                const priceMatches = [...rest.matchAll(/\b(\d{1,3}(?:\.\d{3})*,\d{2}|\d+,\d{2}|\d+\.\d{2})\b/g)];
+                                let rawPriceStr = null;
+                                if (priceMatches.length > 0) { 
+                                    rawPriceStr = priceMatches[priceMatches.length - 1][1]; 
+                                }
                                 const rawPrice = parsePrice(rawPriceStr) || 0; 
-                                let finalName = rest.replace(/\s+Kg\s*\[L\].*$/i, '').trim();
+                                
+                                // Limpa o nome do produto cortando fora as colunas de tabela do PDF
+                                let finalName = rest.split(/Kg\s*\[?L\]?|Vista\s*\/\s*PIX/i)[0];
+                                finalName = finalName.replace(/\s+(?:CX|PC|PCT|BD|PLT|FD|UN|SC|GF|CB)\s+(?:\d+.*)?$/i, '');
+                                finalName = finalName.replace(/\s+(?:\d+(?:\.\d+)?\s*Kg).*$/i, '');
+                                finalName = finalName.replace(/\s+(?:CX|PC|PCT|BD|PLT|FD|UN|SC|GF|CB)\s*$/i, '');
+                                finalName = finalName.replace(/[-—.,]+$/, '').trim();
+
                                 const { hasDiscount, unitFinalPrice } = checkDiscountRules(code, finalName, rawPrice);
-                                extractedProducts.push({ code, name: finalName, originalPrice: rawPrice, discountedPrice: unitFinalPrice });
+                                
+                                extractedProducts.push({ 
+                                    code, name: finalName, originalPrice: rawPrice, discountedPrice: unitFinalPrice 
+                                });
                             }
                         });
                     }
                     setProducts(extractedProducts); 
-                    showMessage(`Sucesso! ${extractedProducts.length} produtos carregados.`, 'success');
+                    showMessage(`Sucesso! ${extractedProducts.length} produtos carregados (Incluindo os sem preço).`, 'success');
                 } catch (err) { showMessage('Erro ao processar PDF.', 'error'); } finally { setIsLoading(false); }
             };
 
@@ -444,14 +468,8 @@
                     if(doc.exists) {
                         setProducts(doc.data().products);
                         showMessage('Tabela mais recente da Nuvem baixada com sucesso!', 'success');
-                    } else {
-                        showMessage('O Administrador ainda não distribuiu nenhuma tabela.', 'error');
-                    }
-                } catch(e) {
-                    showMessage('Erro ao baixar tabela da nuvem.', 'error');
-                } finally {
-                    setIsLoading(false);
-                }
+                    } else { showMessage('O Administrador ainda não distribuiu nenhuma tabela.', 'error'); }
+                } catch(e) { showMessage('Erro ao baixar tabela da nuvem.', 'error'); } finally { setIsLoading(false); }
             };
 
             const filteredProducts = useMemo(() => {
@@ -464,12 +482,8 @@
                     <header className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row items-center justify-between gap-4">
                         <div>
                             <h1 className="text-2xl font-bold text-rose-800 flex items-center gap-2"><div className="h-6 w-6"><IconFileText /></div> Tabela de Preços</h1>
-                            <p className="text-slate-500 text-sm mt-1">Sincronizada automaticamente e salva localmente.</p>
-                            {cloudInfo && (
-                                <p className="text-xs font-bold text-emerald-600 mt-2 bg-emerald-50 inline-block px-2 py-1 rounded-md border border-emerald-100">
-                                    Última Tabela da Nuvem: {cloudInfo.date}
-                                </p>
-                            )}
+                            <p className="text-slate-500 text-sm mt-1">Sincronizada automaticamente no seu dispositivo.</p>
+                            {cloudInfo && <p className="text-xs font-bold text-emerald-600 mt-2 bg-emerald-50 inline-block px-2 py-1 rounded-md border border-emerald-100">Última Tabela da Nuvem: {cloudInfo.date}</p>}
                         </div>
                         
                         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
@@ -479,7 +493,7 @@
                             <div className="relative flex-1 sm:flex-none">
                                 <input type="file" accept=".pdf" onChange={handleFileUpload} disabled={isLoading} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                                 <button disabled={isLoading} className="w-full bg-rose-700 hover:bg-rose-800 text-white px-5 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-md">
-                                    <div className="h-5 w-5">{isLoading ? <IconLoader2 /> : <IconUpload />}</div>{isLoading ? 'Lendo...' : 'Ler PDF'}
+                                    <div className="h-5 w-5">{isLoading ? <IconLoader2 /> : <IconUpload />}</div>{isLoading ? 'Lendo...' : 'Ler PDF Local'}
                                 </button>
                             </div>
                             {user.role === 'admin' && products.length > 0 && (
@@ -514,7 +528,6 @@
             );
         };
 
-        // RESUMO SCREEN (Inteligência Extrator com integração ao CRM)
         const ResumoScreen = ({ products, showMessage, clients }) => {
             const [orderText, setOrderText] = useState('');
             const [showModal, setShowModal] = useState(false);
@@ -557,7 +570,6 @@
                 setOrderSummary({ customerCode: pendingCustomer, spamov: pendingSpamov, items: processed, totalDiscounted: processed.reduce((acc, c) => acc + c.discountedPrice, 0) });
                 setShowModal(false);
 
-                // Verifica se o cliente existe no CRM para oferecer salvar no histórico
                 if (pendingCustomer) {
                     const existingClient = clients.find(c => c.code === pendingCustomer);
                     setClientToSave(existingClient || { code: pendingCustomer, isNew: true });
@@ -570,25 +582,16 @@
                 const newCodes = orderSummary.items.map(i => i.code);
                 try {
                     if (clientToSave.isNew) {
-                         // Cria um novo cliente básico se ele não existir
-                         await db.collection('clients').add({
-                             name: 'Novo Cliente (Auto)',
-                             code: clientToSave.code,
-                             history: newCodes,
-                             profile: { title: "Cadastro Automático", color: "bg-slate-100 text-slate-600" }
-                         });
+                         await db.collection('clients').add({ name: 'Novo Cliente (Auto)', code: clientToSave.code, history: newCodes, profile: { title: "Cadastro Automático", color: "bg-slate-100 text-slate-600" } });
                          showMessage('Novo cliente criado e histórico salvo!', 'success');
                     } else {
-                         // Atualiza cliente existente sem duplicar códigos
                          const currentHistory = clientToSave.history || [];
                          const updatedHistory = [...new Set([...currentHistory, ...newCodes])];
                          await db.collection('clients').doc(clientToSave.id).update({ history: updatedHistory });
                          showMessage('Histórico do cliente atualizado!', 'success');
                     }
                     setShowHistoryPrompt(false);
-                } catch (err) {
-                    showMessage('Erro ao salvar no histórico.', 'error');
-                }
+                } catch (err) { showMessage('Erro ao salvar no histórico.', 'error'); }
             };
 
             const generateWhatsAppText = () => {
@@ -631,24 +634,27 @@
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 flex flex-col relative">
                                 <h3 className="text-lg font-bold text-slate-800 mb-6">Itens do Pedido</h3>
-                                <div className="space-y-3 mb-6 flex-1 overflow-auto">
-                                    {orderSummary.items.map((i, idx) => (
-                                        <div key={idx} className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
-                                            <div className="font-mono text-sm font-bold text-slate-600">{i.code} <span className="mx-2 text-slate-400">|</span> {i.quantity}x</div>
-                                            <div className="font-bold text-rose-700">{formatPrice(i.unitFinalPrice)}</div>
-                                        </div>
-                                    ))}
+                                <div className="overflow-auto flex-1">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead className="bg-white sticky top-0 shadow-sm"><tr><th className="p-4 font-bold text-slate-600 border-b">Cód</th><th className="p-4 font-bold text-slate-600 border-b">Produto</th><th className="p-4 font-bold text-slate-600 border-b text-center">Qtd</th><th className="p-4 font-bold text-rose-700 border-b bg-rose-50 text-right">Preço Un. (-3%)</th></tr></thead>
+                                        <tbody>
+                                            {orderSummary.items.map((i, idx) => (
+                                                <tr key={idx} className="hover:bg-slate-50 border-b border-slate-50">
+                                                    <td className="p-4 text-slate-500 font-bold">{i.code}</td>
+                                                    <td className="p-4 text-slate-800 font-medium">{i.name}</td>
+                                                    <td className="p-4 text-center text-slate-600 font-bold">{i.quantity}x</td>
+                                                    <td className="p-4 text-right font-bold text-rose-700 bg-rose-50/30">{formatPrice(i.unitFinalPrice)}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
                                 </div>
                                 
                                 {showHistoryPrompt && (
                                      <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between animate-in fade-in slide-in-from-bottom-2">
                                          <div>
-                                            <p className="text-sm font-bold text-blue-800">
-                                                {clientToSave?.isNew ? 'Cliente novo detectado!' : 'Salvar no histórico?'}
-                                            </p>
-                                            <p className="text-xs text-blue-600 mt-1">
-                                                {clientToSave?.isNew ? `Deseja cadastrar o ID ${clientToSave.code} e salvar estes itens?` : 'Adicionar itens que o cliente ainda não comprou à ficha dele?'}
-                                            </p>
+                                            <p className="text-sm font-bold text-blue-800">{clientToSave?.isNew ? 'Cliente novo detectado!' : 'Salvar no histórico?'}</p>
+                                            <p className="text-xs text-blue-600 mt-1">{clientToSave?.isNew ? `Deseja cadastrar o ID ${clientToSave.code} e salvar estes itens?` : 'Adicionar itens que o cliente ainda não comprou à ficha dele?'}</p>
                                          </div>
                                          <div className="flex gap-2">
                                             <button onClick={() => setShowHistoryPrompt(false)} className="px-3 py-1.5 text-xs font-bold text-blue-600 hover:bg-blue-100 rounded-lg transition-colors">Não</button>
@@ -675,31 +681,20 @@
             );
         };
 
-        // ORÇAMENTOS SCREEN (Inteligência Marketing)
         const OrcamentosScreen = ({ products, showMessage, activeRoute }) => {
             const [search, setSearch] = useState(''); 
             const [selectedCodes, setSelectedCodes] = useState(new Set());
             
-            // Ativa o pré-carregamento de códigos vindo de ofertas rápidas do CRM
             useEffect(() => {
                 const offerCodes = window.localStorage.getItem('friganso_offer_codes');
                 if (offerCodes && activeRoute === 'orcamentos') {
-                    try {
-                        const codes = JSON.parse(offerCodes);
-                        setSelectedCodes(new Set(codes));
-                        window.localStorage.removeItem('friganso_offer_codes'); // Limpa após carregar
-                        showMessage('Itens do histórico carregados na oferta.', 'success');
-                    } catch(e) {}
+                    try { setSelectedCodes(new Set(JSON.parse(offerCodes))); window.localStorage.removeItem('friganso_offer_codes'); showMessage('Itens do histórico carregados na oferta.', 'success'); } catch(e) {}
                 }
             }, [activeRoute]);
 
             const filtered = useMemo(() => { 
-                if (!search.trim() && selectedCodes.size > 0) {
-                    return products.filter(p => selectedCodes.has(p.code));
-                }
-                if (!search.trim()) return []; 
-                const norm = normalizeForSearch(search); 
-                return products.filter(p => normalizeForSearch(p.name).includes(norm) || p.code.includes(norm)); 
+                if (!search.trim() && selectedCodes.size > 0) return products.filter(p => selectedCodes.has(p.code));
+                if (!search.trim()) return []; const norm = normalizeForSearch(search); return products.filter(p => normalizeForSearch(p.name).includes(norm) || p.code.includes(norm)); 
             }, [products, search, selectedCodes]);
 
             const toggleCode = code => { const s = new Set(selectedCodes); s.has(code) ? s.delete(code) : s.add(code); setSelectedCodes(s); };
@@ -717,24 +712,15 @@
 
             return (
                 <div className="animate-in fade-in space-y-6">
-                    <header className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
-                        <h1 className="text-2xl font-bold text-rose-800 flex items-center gap-2 mb-4"><div className="h-6 w-6"><IconTag /></div> Gerador de Zap</h1>
-                        <input type="text" placeholder="Digite Picanha, Costela..." value={search} onChange={e=>setSearch(e.target.value)} disabled={products.length===0} className="w-full p-4 rounded-xl border border-slate-200 outline-none focus:border-rose-500 font-bold bg-slate-50"/>
-                    </header>
+                    <header className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6"><h1 className="text-2xl font-bold text-rose-800 flex items-center gap-2 mb-4"><div className="h-6 w-6"><IconTag /></div> Gerador de Zap</h1><input type="text" placeholder="Digite Picanha, Costela..." value={search} onChange={e=>setSearch(e.target.value)} disabled={products.length===0} className="w-full p-4 rounded-xl border border-slate-200 outline-none focus:border-rose-500 font-bold bg-slate-50"/></header>
                     {(search || selectedCodes.size > 0) && (
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                             <div className="lg:col-span-4 bg-white rounded-3xl border border-slate-200 flex flex-col h-[600px] overflow-hidden">
                                 <div className="p-4 border-b bg-slate-50 flex justify-between items-center font-bold text-slate-700">
                                     <span>Produtos</span> 
                                     <div className="flex gap-2">
-                                        {selectedCodes.size > 0 && (
-                                            <button onClick={() => setSelectedCodes(new Set())} className="text-xs bg-rose-100 hover:bg-rose-200 text-rose-700 px-3 py-1.5 rounded-lg transition-colors font-bold shadow-sm">
-                                                Desmarcar
-                                            </button>
-                                        )}
-                                        <button onClick={() => setSelectedCodes(new Set(filtered.map(f=>f.code)))} className="text-xs bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded-lg transition-colors font-bold shadow-sm">
-                                            Marcar Todos
-                                        </button>
+                                        {selectedCodes.size > 0 && <button onClick={() => setSelectedCodes(new Set())} className="text-xs bg-rose-100 hover:bg-rose-200 text-rose-700 px-3 py-1.5 rounded-lg font-bold shadow-sm">Desmarcar</button>}
+                                        <button onClick={() => setSelectedCodes(new Set(filtered.map(f=>f.code)))} className="text-xs bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded-lg font-bold shadow-sm">Marcar Todos</button>
                                     </div>
                                 </div>
                                 <div className="overflow-y-auto p-2 space-y-1">
@@ -752,9 +738,7 @@
                             <div className="lg:col-span-8 bg-white rounded-3xl border border-slate-200 flex flex-col h-[600px] overflow-hidden">
                                 <div className="p-4 border-b bg-slate-50 flex justify-between items-center font-bold text-slate-700">
                                     <span className="flex items-center gap-2"><div className="h-5 w-5 text-emerald-600"><IconWhatsApp/></div> Preview Zap</span>
-                                    <button onClick={() => { navigator.clipboard.writeText(generateText()); showMessage('Copiado para o Zap!', 'success'); }} className="bg-rose-700 hover:bg-rose-800 transition-colors text-white px-5 py-2.5 rounded-xl text-sm shadow-md">
-                                        Copiar Orçamento
-                                    </button>
+                                    <button onClick={() => { navigator.clipboard.writeText(generateText()); showMessage('Copiado para o Zap!', 'success'); }} className="bg-rose-700 hover:bg-rose-800 transition-colors text-white px-5 py-2.5 rounded-xl text-sm shadow-md">Copiar Orçamento</button>
                                 </div>
                                 <div className="p-6 bg-slate-100 flex-1 overflow-y-auto" style={{backgroundImage: "url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')", backgroundSize: 'cover', backgroundPosition: 'center'}}>
                                     {selectedCodes.size > 0 ? (
@@ -762,11 +746,7 @@
                                             <pre className="font-mono text-sm whitespace-pre-wrap text-slate-800 font-medium">{generateText()}</pre>
                                         </div>
                                     ) : (
-                                        <div className="h-full flex items-center justify-center text-center">
-                                            <div className="bg-white/95 p-4 rounded-xl shadow-sm border border-slate-200">
-                                                <p className="text-slate-600 font-medium">Selecione produtos na lista ao lado.</p>
-                                            </div>
-                                        </div>
+                                        <div className="h-full flex items-center justify-center text-center"><div className="bg-white/95 p-4 rounded-xl shadow-sm border border-slate-200"><p className="text-slate-600 font-medium">Selecione produtos na lista ao lado.</p></div></div>
                                     )}
                                 </div>
                             </div>
@@ -776,7 +756,10 @@
             );
         };
 
-        // CLIENTS SCREEN (CRM - Salvando no Firestore)
+        const LikertScale = ({ question, value, onChange }) => (
+            <div className="mb-4 bg-white p-4 rounded-xl border border-slate-200 hover:border-rose-300 transition-colors shadow-sm"><p className="font-semibold text-slate-700 mb-3 text-sm">{question}</p><div className="flex items-center justify-between gap-2"><span className="text-[10px] sm:text-xs text-slate-400 font-bold uppercase">1 - Não</span><div className="flex gap-1.5 sm:gap-3">{[1, 2, 3, 4, 5].map(num => (<button key={num} type="button" onClick={() => onChange(num)} className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition-all border-2 ${value === num ? 'bg-rose-700 border-rose-700 text-white shadow-md transform scale-110' : 'bg-slate-50 border-slate-300 text-slate-500 hover:border-rose-400 hover:bg-rose-50'}`}>{num}</button>))}</div><span className="text-[10px] sm:text-xs text-slate-400 font-bold uppercase">5 - Sim</span></div></div>
+        );
+
         const ClientsScreen = ({ products, showMessage, setActiveRoute }) => {
             const [clients, setClients] = useState([]);
             const [isAdding, setIsAdding] = useState(false);
@@ -840,14 +823,7 @@
             const handleUpdateClient = async () => {
                 if(!editForm.code) { showMessage("O ID não pode ficar vazio.", "error"); return; }
                 try {
-                    await db.collection('clients').doc(selectedClient.id).update({
-                        name: editForm.name,
-                        contactName: editForm.contactName || '',
-                        code: editForm.code,
-                        cnpj: editForm.cnpj || '',
-                        phone: editForm.phone || '',
-                        address: editForm.address || ''
-                    });
+                    await db.collection('clients').doc(selectedClient.id).update({ name: editForm.name, contactName: editForm.contactName || '', code: editForm.code, cnpj: editForm.cnpj || '', phone: editForm.phone || '', address: editForm.address || '' });
                     showMessage("Alterações salvas!", "success");
                 } catch(e) { showMessage("Erro ao atualizar.", "error"); }
             };
@@ -862,7 +838,7 @@
                         products.forEach(p => { if (rawHistoryText.includes(p.code)) foundCodes.push(p.code); });
                     }
                     const validCodes = [...new Set(foundCodes)].filter(code => products.some(p => p.code === code));
-                    if (validCodes.length === 0) { showMessage('Nenhum código reconhecido na tabela.', 'error'); setIsExtractingHistory(false); return; }
+                    if (validCodes.length === 0) { showMessage('Nenhum código reconhecido.', 'error'); setIsExtractingHistory(false); return; }
                     
                     const currentHistory = editForm.history || [];
                     const newHistory = [...new Set([...currentHistory, ...validCodes])];
@@ -875,19 +851,17 @@
             if (isAdding) return (
                 <div className="animate-in fade-in">
                     <div className="flex justify-between items-center mb-6"><h2 className="text-2xl font-bold text-slate-800">Novo Cliente Inteligente</h2><button onClick={() => setIsAdding(false)} className="text-slate-500 font-medium px-4 py-2 bg-slate-200 rounded-lg">Voltar</button></div>
-                    
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 mb-6">
                         <h3 className="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2"><div className="h-5 w-5 text-rose-600"><IconWand/></div> Leitor de Cadastro Inteligente</h3>
                         <textarea value={rawClientText} onChange={e => setRawClientText(e.target.value)} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-rose-500 text-xs font-mono h-24 mb-3 resize-none" placeholder="Cole o bloco do ERP aqui..."></textarea>
                         <button type="button" onClick={handleExtractClientData} className="bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 px-6 rounded-xl shadow-md transition-all text-sm">Extrair Dados</button>
                     </div>
-
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
                         <form onSubmit={handleSave}>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                                 <div><label className="block text-xs font-bold text-slate-500 mb-1">Nome Fantasia</label><input type="text" value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value})} className="w-full p-3 bg-slate-50 border rounded-lg focus:border-rose-500 outline-none"/></div>
                                 <div><label className="block text-xs font-bold text-slate-500 mb-1">Nome do Contato / Dono</label><input type="text" value={formData.contactName} onChange={e=>setFormData({...formData, contactName: e.target.value})} className="w-full p-3 bg-slate-50 border rounded-lg focus:border-rose-500 outline-none"/></div>
-                                <div><label className="block text-xs font-bold text-slate-500 mb-1">ID do Cliente (Obrigatório)*</label><input type="text" required value={formData.code} onChange={e=>setFormData({...formData, code: e.target.value})} className="w-full p-3 bg-slate-50 border rounded-lg focus:border-rose-500 outline-none"/></div>
+                                <div><label className="block text-xs font-bold text-slate-500 mb-1">ID Cliente (Obrigatório)*</label><input type="text" required value={formData.code} onChange={e=>setFormData({...formData, code: e.target.value})} className="w-full p-3 bg-slate-50 border rounded-lg focus:border-rose-500 outline-none"/></div>
                                 <div><label className="block text-xs font-bold text-slate-500 mb-1">CNPJ</label><input type="text" value={formData.cnpj} onChange={e=>setFormData({...formData, cnpj: e.target.value})} className="w-full p-3 bg-slate-50 border rounded-lg focus:border-rose-500 outline-none"/></div>
                                 <div><label className="block text-xs font-bold text-slate-500 mb-1">Telefone</label><input type="text" value={formData.phone} onChange={e=>setFormData({...formData, phone: e.target.value})} className="w-full p-3 bg-slate-50 border rounded-lg focus:border-rose-500 outline-none"/></div>
                                 <div><label className="block text-xs font-bold text-slate-500 mb-1">Endereço</label><input type="text" value={formData.address} onChange={e=>setFormData({...formData, address: e.target.value})} className="w-full p-3 bg-slate-50 border rounded-lg focus:border-rose-500 outline-none"/></div>
@@ -907,9 +881,7 @@
                             <div className="bg-slate-50 rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95">
                                 <div className="p-6 border-b border-slate-200 bg-white flex justify-between items-center shadow-sm z-10">
                                     <div className="flex items-center gap-4">
-                                        <div className="h-14 w-14 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-xl">
-                                            {editForm.name ? editForm.name.charAt(0) : 'C'}
-                                        </div>
+                                        <div className="h-14 w-14 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-xl">{editForm.name ? editForm.name.charAt(0) : 'C'}</div>
                                         <div>
                                             <h2 className="text-2xl font-bold text-slate-800 leading-none">{editForm.name || 'Empresa'}</h2>
                                             {editForm.contactName && <p className="text-xs font-bold text-slate-400 mt-1 uppercase">Contato: <span className="text-slate-600">{editForm.contactName}</span></p>}
@@ -917,55 +889,40 @@
                                     </div>
                                     <button onClick={() => setSelectedClient(null)} className="h-10 w-10 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-500 transition-colors"><IconX/></button>
                                 </div>
-
                                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                        {/* Coluna Dados */}
                                         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                                             <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-2 flex items-center gap-2"><div className="h-5 w-5 text-blue-500"><IconUser/></div> Dados Cadastrais</h3>
                                             <div className="space-y-3">
                                                 <div><label className="text-xs font-bold text-slate-500">Nome Fantasia</label><input type="text" value={editForm.name || ''} onChange={e => setEditForm({...editForm, name: e.target.value})} className="w-full p-2.5 bg-slate-50 border rounded-lg text-sm font-bold outline-none focus:border-rose-500"/></div>
-                                                <div><label className="text-xs font-bold text-slate-500">Nome do Contato / Proprietário</label><input type="text" value={editForm.contactName || ''} onChange={e => setEditForm({...editForm, contactName: e.target.value})} className="w-full p-2.5 bg-slate-50 border rounded-lg text-sm outline-none focus:border-rose-500"/></div>
+                                                <div><label className="text-xs font-bold text-slate-500">Contato / Proprietário</label><input type="text" value={editForm.contactName || ''} onChange={e => setEditForm({...editForm, contactName: e.target.value})} className="w-full p-2.5 bg-slate-50 border rounded-lg text-sm outline-none focus:border-rose-500"/></div>
                                                 <div className="grid grid-cols-2 gap-3">
                                                     <div><label className="text-xs font-bold text-slate-500">ID Cliente</label><input type="text" value={editForm.code || ''} onChange={e => setEditForm({...editForm, code: e.target.value})} className="w-full p-2.5 bg-slate-50 border rounded-lg text-sm outline-none focus:border-rose-500"/></div>
                                                     <div><label className="text-xs font-bold text-slate-500">CNPJ</label><input type="text" value={editForm.cnpj || ''} onChange={e => setEditForm({...editForm, cnpj: e.target.value})} className="w-full p-2.5 bg-slate-50 border rounded-lg text-sm outline-none focus:border-rose-500"/></div>
                                                 </div>
-                                                <div><label className="text-xs font-bold text-slate-500">Telefone / WhatsApp</label><input type="text" value={editForm.phone || ''} onChange={e => setEditForm({...editForm, phone: e.target.value})} className="w-full p-2.5 bg-slate-50 border rounded-lg text-sm outline-none focus:border-rose-500"/></div>
-                                                <div><label className="text-xs font-bold text-slate-500">Endereço Completo</label><textarea value={editForm.address || ''} onChange={e => setEditForm({...editForm, address: e.target.value})} className="w-full p-2.5 bg-slate-50 border rounded-lg text-sm resize-none outline-none focus:border-rose-500" rows="2"></textarea></div>
+                                                <div><label className="text-xs font-bold text-slate-500">WhatsApp</label><input type="text" value={editForm.phone || ''} onChange={e => setEditForm({...editForm, phone: e.target.value})} className="w-full p-2.5 bg-slate-50 border rounded-lg text-sm outline-none focus:border-rose-500"/></div>
+                                                <div><label className="text-xs font-bold text-slate-500">Endereço</label><textarea value={editForm.address || ''} onChange={e => setEditForm({...editForm, address: e.target.value})} className="w-full p-2.5 bg-slate-50 border rounded-lg text-sm resize-none outline-none focus:border-rose-500" rows="2"></textarea></div>
                                                 <button onClick={handleUpdateClient} className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-sm font-bold shadow-md transition-colors">Salvar Alterações</button>
                                             </div>
                                         </div>
-
-                                        {/* Coluna Histórico */}
                                         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
                                             <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-2 mb-4 flex items-center gap-2"><div className="h-5 w-5 text-rose-600"><IconHistory/></div> Histórico de Compras</h3>
-                                            
                                             <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-4">
-                                                <label className="block text-xs font-bold text-slate-600 mb-2">Colar Tabela ERP para atualizar histórico</label>
-                                                <textarea value={rawHistoryText} onChange={e => setRawHistoryText(e.target.value)} placeholder="Cole o histórico de vendas daqui..." className="w-full h-16 p-2 bg-white border rounded-lg outline-none text-xs font-mono resize-none"></textarea>
+                                                <label className="block text-xs font-bold text-slate-600 mb-2">Colar Tabela ERP para atualizar</label>
+                                                <textarea value={rawHistoryText} onChange={e => setRawHistoryText(e.target.value)} placeholder="Cole o histórico daqui..." className="w-full h-16 p-2 bg-white border rounded-lg outline-none text-xs font-mono resize-none"></textarea>
                                                 <div className="mt-2 flex justify-end">
                                                     <button onClick={handleExtractHistory} disabled={isExtractingHistory} className="bg-rose-700 hover:bg-rose-800 text-white px-4 py-1.5 rounded-lg font-bold text-xs shadow-sm transition-all flex items-center gap-1">
                                                         {isExtractingHistory ? <IconLoader2/> : <IconPlus/>} Adicionar ao Histórico
                                                     </button>
                                                 </div>
                                             </div>
-
                                             <div className="flex-1 overflow-y-auto pr-1">
                                                 {(!editForm.history || editForm.history.length === 0) ? (
                                                     <div className="h-full flex items-center justify-center text-slate-400 text-sm font-medium italic">Nenhum histórico registrado.</div>
                                                 ) : (
                                                     <div className="space-y-2 relative">
                                                         <div className="flex justify-end mb-2 sticky top-0 bg-white pb-2 z-10">
-                                                             <button 
-                                                                onClick={() => {
-                                                                    window.localStorage.setItem('friganso_offer_codes', JSON.stringify(editForm.history));
-                                                                    setSelectedClient(null);
-                                                                    setActiveRoute('orcamentos');
-                                                                }} 
-                                                                className="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1"
-                                                             >
-                                                                <IconWhatsApp className="h-3 w-3" /> Enviar Oferta (Zap)
-                                                             </button>
+                                                             <button onClick={() => { window.localStorage.setItem('friganso_offer_codes', JSON.stringify(editForm.history)); setSelectedClient(null); setActiveRoute('orcamentos'); }} className="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1"><IconWhatsApp className="h-3 w-3" /> Enviar Oferta (Zap)</button>
                                                         </div>
                                                         {editForm.history.map(code => {
                                                             const p = products.find(prod => prod.code === code);
@@ -987,7 +944,6 @@
                     )}
 
                     <div className="flex justify-between items-center mb-6"><div><h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2"><div className="h-6 w-6 text-rose-700"><IconUsers/></div>CRM & Rotas</h2><p className="text-slate-500 text-sm">Base de dados classificada pela IA.</p></div><button onClick={() => setIsAdding(true)} className="bg-rose-700 text-white font-bold py-2.5 px-5 rounded-xl shadow-md flex items-center gap-2"><div className="h-5 w-5"><IconPlus/></div> Novo Cliente</button></div>
-                    
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                         {clients.map(c => (
                             <div key={c.id} onClick={() => setSelectedClient(c)} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 relative overflow-hidden flex flex-col hover:shadow-md hover:border-rose-400 hover:scale-[1.02] transition-all cursor-pointer group">
@@ -995,9 +951,7 @@
                                 <div className="ml-2 flex-1">
                                     <h4 className="font-bold text-lg text-slate-800 leading-tight truncate">{c.name || 'Empresa S/ Nome'}</h4>
                                     {c.contactName && <p className="text-xs font-bold text-slate-400 mb-2 truncate uppercase">Contato: <span className="text-slate-600">{c.contactName}</span></p>}
-                                    
                                     <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-bold mt-1 mb-4 ${c.profile?.color || 'bg-slate-100 text-slate-600'}`}>{c.profile?.title || 'Perfil Base'}</span>
-                                    
                                     <div className="space-y-1.5 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
                                         <p><b className="text-slate-400">ID:</b> <span className="font-mono font-bold">{c.code}</span></p>
                                         {c.cnpj && <p><b className="text-slate-400">CNPJ:</b> {c.cnpj}</p>}
@@ -1089,16 +1043,15 @@
             const [messageBox, setMessageBox] = useState(null);
             const [clients, setClients] = useState([]);
             
-            const [products, setProductsState] = useState(() => {
-                const savedProds = window.localStorage.getItem('friganso_products');
-                return savedProds ? JSON.parse(savedProds) : [];
-            });
-
-            // Atualiza base de clientes local
             useEffect(() => {
                 const unsubscribe = db.collection('clients').onSnapshot(snap => setClients(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
                 return () => unsubscribe();
             }, []);
+            
+            const [products, setProductsState] = useState(() => {
+                const savedProds = window.localStorage.getItem('friganso_products');
+                return savedProds ? JSON.parse(savedProds) : [];
+            });
 
             const setProducts = (newProducts) => {
                 setProductsState(newProducts);
