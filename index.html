@@ -4,16 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Friganso - Premium ERP</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- React & ReactDOM -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- PDF.js para leitura de PDFs offline -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    
-    <!-- FIREBASE (Banco de Dados e Auth) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -46,9 +41,7 @@
             measurementId: atob("Ry05NjNTVzNYU1lN")
         };
         
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
@@ -62,12 +55,7 @@
 
         const FrigansoLogo = ({ className }) => (
             <svg className={className} viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <linearGradient id="roseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#e11d48" />
-                        <stop offset="100%" stopColor="#881337" />
-                    </linearGradient>
-                </defs>
+                <defs><linearGradient id="roseGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#e11d48" /><stop offset="100%" stopColor="#881337" /></linearGradient></defs>
                 <path d="M100 10 L180 50 L180 140 L100 190 L20 140 L20 50 Z" fill="url(#roseGrad)" />
                 <path d="M100 30 L160 60 L160 130 L100 165 L40 130 L40 60 Z" fill="#0f172a" />
                 <path d="M85 70 L125 70 L125 85 L100 85 L100 100 L120 100 L120 115 L100 115 L100 140 L85 140 Z" fill="#ffffff" />
@@ -640,9 +628,16 @@
                             <div className="lg:col-span-4 bg-white rounded-3xl border border-slate-200 flex flex-col h-[600px] overflow-hidden">
                                 <div className="p-4 border-b bg-slate-50 flex justify-between items-center font-bold text-slate-700">
                                     <span>Produtos</span> 
-                                    <button onClick={() => { if(selectedCodes.size === filtered.length) setSelectedCodes(new Set()); else setSelectedCodes(new Set(filtered.map(f=>f.code))); }} className="text-xs bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded-lg">
-                                        {selectedCodes.size === filtered.length ? 'Desmarcar' : 'Marcar Todos'}
-                                    </button>
+                                    <div className="flex gap-2">
+                                        {selectedCodes.size > 0 && (
+                                            <button onClick={() => setSelectedCodes(new Set())} className="text-xs bg-rose-100 hover:bg-rose-200 text-rose-700 px-3 py-1.5 rounded-lg transition-colors font-bold shadow-sm">
+                                                Desmarcar
+                                            </button>
+                                        )}
+                                        <button onClick={() => setSelectedCodes(new Set(filtered.map(f=>f.code)))} className="text-xs bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded-lg transition-colors font-bold shadow-sm">
+                                            Marcar Todos
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className="overflow-y-auto p-2 space-y-1">
                                     {filtered.map(p => (
@@ -703,7 +698,6 @@
                 return () => unsubscribe();
             }, []);
 
-            // Mantém os dados da edição sempre sincronizados se o firebase atualizar
             useEffect(() => {
                 if(selectedClient) {
                     const current = clients.find(c => c.id === selectedClient.id);
@@ -815,12 +809,9 @@
 
             return (
                 <div className="animate-in fade-in relative">
-                    {/* MODAL: PERFIL COMPLETO DO CLIENTE */}
                     {selectedClient && (
                         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                             <div className="bg-slate-50 rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95">
-                                
-                                {/* Cabeçalho do Perfil */}
                                 <div className="p-6 border-b border-slate-200 bg-white flex justify-between items-center shadow-sm z-10">
                                     <div className="flex items-center gap-4">
                                         <div className="h-14 w-14 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-xl">
@@ -836,8 +827,6 @@
 
                                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                        
-                                        {/* SEÇÃO 1: DADOS E EDIÇÃO */}
                                         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                                             <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-2 flex items-center gap-2"><div className="h-5 w-5 text-blue-500"><IconUser/></div> Informações de Contato</h3>
                                             <div className="space-y-3">
@@ -853,10 +842,8 @@
                                             </div>
                                         </div>
 
-                                        {/* SEÇÃO 2: HISTÓRICO DE COMPRAS */}
                                         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
                                             <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-2 mb-4 flex items-center gap-2"><div className="h-5 w-5 text-rose-600"><IconHistory/></div> Produtos do Cliente</h3>
-                                            
                                             <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-4">
                                                 <label className="block text-xs font-bold text-slate-600 mb-2">Colar Tabela ERP para atualizar histórico</label>
                                                 <textarea value={rawHistoryText} onChange={e => setRawHistoryText(e.target.value)} placeholder="Cole 1S0210CARNE SECA P.A..." className="w-full h-16 p-2 bg-white border border-slate-200 rounded-lg outline-none text-xs font-mono resize-none"></textarea>
@@ -866,7 +853,6 @@
                                                     </button>
                                                 </div>
                                             </div>
-
                                             <div className="flex-1 overflow-y-auto pr-1">
                                                 {(!editForm.history || editForm.history.length === 0) ? (
                                                     <div className="h-full flex items-center justify-center text-slate-400 text-sm font-medium italic">Nenhum histórico registrado.</div>
@@ -885,7 +871,6 @@
                                                 )}
                                             </div>
                                         </div>
-
                                     </div>
                                 </div>
                             </div>
