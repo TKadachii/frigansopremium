@@ -377,6 +377,9 @@
             const [isLoading, setIsLoading] = useState(false);
             const [searchTerm, setSearchTerm] = useState('');
             const [cloudInfo, setCloudInfo] = useState(null);
+            const [showCloudModal, setShowCloudModal] = useState(false);
+            const [pdfVersions, setPdfVersions] = useState([]);
+            const [isLoadingVersions, setIsLoadingVersions] = useState(false);
 
             useEffect(() => { 
                 if (window.pdfjsLib) window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; 
@@ -392,6 +395,17 @@
                         setCloudInfo({ date: date.toLocaleDateString('pt-BR') + ' às ' + date.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}) });
                     }
                 } catch(e) { console.error(e) }
+            };
+
+            const fetchPdfVersions = async () => {
+                setIsLoadingVersions(true);
+                try {
+                    const snap = await db.collection('pdf_versions').orderBy('updatedAt', 'desc').limit(20).get();
+                    setPdfVersions(snap.docs.map(d => {
+                        const data = d.data();
+                        return { id: d.id, ...data, date: data.updatedAt ? data.updatedAt.toDate() : null };
+                    }));
+                } catch(e) { console.error(e); } finally { setIsLoadingVersions(false); }
             };
 
             const handleFileUpload = async (e) => {
@@ -455,7 +469,9 @@
             const handleDistribute = async () => {
                 try {
                     setIsLoading(true);
-                    await db.collection('system_data').doc('shared_pdf').set({ products, updatedAt: new Date() });
+                    const now = new Date();
+                    await db.collection('system_data').doc('shared_pdf').set({ products, updatedAt: now });
+                    await db.collection('pdf_versions').add({ products, updatedAt: now, productCount: products.length });
                     showMessage('Tabela salva na Nuvem para todos os Vendedores!', 'success');
                     fetchCloudInfo();
                 } catch(e) { showMessage('Erro ao distribuir tabela.', 'error'); } finally { setIsLoading(false); }
@@ -479,6 +495,36 @@
 
             return (
                 <div className="animate-in fade-in space-y-6">
+                    {showCloudModal && (
+                        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col max-h-[70vh] overflow-hidden">
+                                <div className="p-5 border-b bg-slate-50 flex justify-between items-center">
+                                    <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2"><div className="h-5 w-5"><IconCloudDownload/></div> Histórico de Tabelas</h2>
+                                    <button onClick={() => setShowCloudModal(false)} className="h-8 w-8 flex items-center justify-center rounded-full bg-slate-200 hover:bg-slate-300 transition-colors"><div className="h-4 w-4"><IconX/></div></button>
+                                </div>
+                                <div className="overflow-y-auto flex-1 p-4 space-y-2">
+                                    {isLoadingVersions ? (
+                                        <div className="flex justify-center py-8"><div className="h-6 w-6 text-rose-600"><IconLoader2/></div></div>
+                                    ) : pdfVersions.length === 0 ? (
+                                        <div className="text-center py-8 text-slate-400 text-sm font-medium">Nenhuma versão salva. Distribua uma tabela para ver o histórico.</div>
+                                    ) : pdfVersions.map((v, i) => (
+                                        <div key={v.id} className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl hover:border-rose-300 transition-colors">
+                                            <div>
+                                                <p className="font-bold text-slate-700 text-sm">{i === 0 ? '🟢 Versão Atual' : `Versão ${pdfVersions.length - i}`}</p>
+                                                <p className="text-xs text-slate-500 mt-0.5">{v.date ? v.date.toLocaleDateString('pt-BR') + ' às ' + v.date.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) : 'Data desconhecida'} • {v.productCount || (v.products?.length || 0)} produtos</p>
+                                            </div>
+                                            <button onClick={() => { setProducts(v.products); setShowCloudModal(false); showMessage('Tabela carregada com sucesso!', 'success'); }} className="text-xs bg-rose-700 hover:bg-rose-800 text-white px-3 py-1.5 rounded-lg font-bold shadow-sm transition-colors">Carregar</button>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="p-4 border-t bg-slate-50">
+                                    <button onClick={async () => { try { setIsLoading(true); const doc = await db.collection('system_data').doc('shared_pdf').get(); if(doc.exists){ setProducts(doc.data().products); setShowCloudModal(false); showMessage('Tabela atual carregada!','success'); } else { showMessage('Nenhuma tabela distribuída ainda.','error'); } } catch(e){ showMessage('Erro ao baixar.','error'); } finally{ setIsLoading(false); } }} disabled={isLoading} className="w-full bg-slate-800 hover:bg-slate-900 text-white py-2.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2">
+                                        <div className="h-4 w-4"><IconCloudDownload/></div> Baixar Tabela Atual
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     <header className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row items-center justify-between gap-4">
                         <div>
                             <h1 className="text-2xl font-bold text-rose-800 flex items-center gap-2"><div className="h-6 w-6"><IconFileText /></div> Tabela de Preços</h1>
@@ -487,7 +533,7 @@
                         </div>
                         
                         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                            <button onClick={handleDownloadCloud} disabled={isLoading} className="bg-slate-800 hover:bg-slate-900 text-white px-5 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-md">
+                            <button onClick={() => { fetchPdfVersions(); setShowCloudModal(true); }} disabled={isLoading} className="bg-slate-800 hover:bg-slate-900 text-white px-5 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-md">
                                 <div className="h-5 w-5"><IconCloudDownload /></div> Nuvem
                             </button>
                             <div className="relative flex-1 sm:flex-none">
@@ -528,7 +574,7 @@
             );
         };
 
-        const ResumoScreen = ({ products, showMessage, clients }) => {
+        const ResumoScreen = ({ products, showMessage, clients, setActiveRoute }) => {
             const [orderText, setOrderText] = useState('');
             const [showModal, setShowModal] = useState(false);
             const [pendingCustomer, setPendingCustomer] = useState('');
@@ -537,17 +583,19 @@
             const [orderSummary, setOrderSummary] = useState(null);
             const [showHistoryPrompt, setShowHistoryPrompt] = useState(false);
             const [clientToSave, setClientToSave] = useState(null);
+            const [editedPrices, setEditedPrices] = useState({});
 
-            const handleProcessText = () => {
+            const handleProcessText = (forcedText) => {
+                const txt = typeof forcedText === 'string' ? forcedText : orderText;
                 if (products.length === 0) { showMessage('Importe ou Baixe a Tabela primeiro!', 'error'); return; }
-                if (!orderText.trim()) { showMessage('Cole o texto do pedido.', 'error'); return; }
+                if (!txt.trim()) { showMessage('Cole o texto do pedido.', 'error'); return; }
                 try {
                     let customerName = '', spamov = '';
-                    const spMatch = orderText.match(/SPAmov[:\-\s]*(\d+)/i); if (spMatch) spamov = spMatch[1];
-                    const clienteMatchNormal = orderText.match(/(?:cliente|código|codigo)[:\-\s]+(\d+)/i); if (clienteMatchNormal) customerName = clienteMatchNormal[1].trim();
+                    const spMatch = txt.match(/SPAmov[:\-\s]*(\d+)/i); if (spMatch) spamov = spMatch[1];
+                    const clienteMatchNormal = txt.match(/(?:cliente|código|codigo)[:\-\s]+(\d+)/i); if (clienteMatchNormal) customerName = clienteMatchNormal[1].trim();
 
                     let extractedItemsMap = new Map();
-                    orderText.split('\n').forEach(line => {
+                    txt.split('\n').forEach(line => {
                         if (!line.trim() || line.toUpperCase().includes('CLIENTE') || line.toUpperCase().includes('SPAMOV')) return;
                         const cleanLine = line.replace(/\([^)]+\)/g, ' ').trim();
                         let codeFound = null; const possibleNumbers = cleanLine.match(/\d+/g) || [];
@@ -567,6 +615,7 @@
                     const { hasDiscount, origPrice, unitFinalPrice } = checkDiscountRules(item.code, rp.name, rp.originalPrice);
                     const qty = Number(item.quantity); return { ...item, quantity: qty, unitFinalPrice, discountedPrice: unitFinalPrice * qty, originalPrice: origPrice * qty, hasDiscount };
                 });
+                setEditedPrices({});
                 setOrderSummary({ customerCode: pendingCustomer, spamov: pendingSpamov, items: processed, totalDiscounted: processed.reduce((acc, c) => acc + c.discountedPrice, 0) });
                 setShowModal(false);
 
@@ -582,13 +631,13 @@
                 const newCodes = orderSummary.items.map(i => i.code);
                 try {
                     if (clientToSave.isNew) {
-                         await db.collection('clients').add({ name: 'Novo Cliente (Auto)', code: clientToSave.code, history: newCodes, profile: { title: "Cadastro Automático", color: "bg-slate-100 text-slate-600" } });
-                         showMessage('Novo cliente criado e histórico salvo!', 'success');
+                        await db.collection('clients').add({ name: `Cliente ${clientToSave.code}`, code: clientToSave.code, phone: '', cnpj: '', address: '', contactName: '', history: newCodes, rawData: orderText, profile: { title: "Cadastro Automático", color: "bg-slate-100 text-slate-600" } });
+                        showMessage('Novo cliente criado! Acesse CRM & Rotas para completar o cadastro.', 'success');
                     } else {
-                         const currentHistory = clientToSave.history || [];
-                         const updatedHistory = [...new Set([...currentHistory, ...newCodes])];
-                         await db.collection('clients').doc(clientToSave.id).update({ history: updatedHistory });
-                         showMessage('Histórico do cliente atualizado!', 'success');
+                        const currentHistory = clientToSave.history || [];
+                        const updatedHistory = [...new Set([...currentHistory, ...newCodes])];
+                        await db.collection('clients').doc(clientToSave.id).update({ history: updatedHistory });
+                        showMessage('Histórico do cliente atualizado!', 'success');
                     }
                     setShowHistoryPrompt(false);
                 } catch (err) { showMessage('Erro ao salvar no histórico.', 'error'); }
@@ -600,9 +649,9 @@
                 if (orderSummary.customerCode) txt += `Cliente: ${orderSummary.customerCode}\n`;
                 if (orderSummary.spamov) txt += `SPAmov: ${orderSummary.spamov}\n`;
                 if (txt !== '') txt += '\n';
-                
                 orderSummary.items.forEach(item => {
-                    txt += `${item.code} - ${item.quantity}x - ${formatPrice(item.unitFinalPrice)}\n`;
+                    const price = editedPrices[item.code] !== undefined ? editedPrices[item.code] : item.unitFinalPrice;
+                    txt += `${item.code} - ${item.quantity}x - ${formatPrice(price)}\n`;
                 });
                 return txt.trim();
             };
@@ -627,29 +676,53 @@
                     )}
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
                         <h2 className="text-xl font-bold text-rose-800 mb-4 flex items-center gap-2"><div className="h-6 w-6"><IconReceipt /></div> Resumo de Pedido</h2>
-                        <textarea value={orderText} onChange={e => setOrderText(e.target.value)} placeholder="Cole o pedido do ERP aqui..." className="w-full h-40 p-4 rounded-xl border border-slate-200 focus:border-rose-500 outline-none resize-none font-mono text-sm mb-4 bg-slate-50"></textarea>
-                        <button onClick={handleProcessText} className="w-full bg-slate-900 hover:bg-black text-white py-4 rounded-xl font-bold shadow-md transition-all">Analisar Códigos</button>
+                        <textarea
+                            value={orderText}
+                            onChange={e => setOrderText(e.target.value)}
+                            onPaste={e => { const t = e.clipboardData.getData('text'); setTimeout(() => handleProcessText(t), 80); }}
+                            placeholder="Cole o pedido do ERP aqui... (análise automática ao colar)"
+                            className="w-full h-40 p-4 rounded-xl border border-slate-200 focus:border-rose-500 outline-none resize-none font-mono text-sm mb-4 bg-slate-50">
+                        </textarea>
+                        <button onClick={() => handleProcessText()} className="w-full bg-slate-900 hover:bg-black text-white py-4 rounded-xl font-bold shadow-md transition-all">Analisar Pedido</button>
                     </div>
                     {orderSummary && !showModal && (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 flex flex-col relative">
-                                <h3 className="text-lg font-bold text-slate-800 mb-6">Itens do Pedido</h3>
+                                <div className="mb-4">
+                                    <h3 className="text-lg font-bold text-slate-800">Itens do Pedido</h3>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        {orderSummary.customerCode && <span className="text-xs font-bold bg-slate-100 text-slate-700 px-2 py-1 rounded-lg border border-slate-200">ID: {orderSummary.customerCode}</span>}
+                                        {orderSummary.spamov && <span className="text-xs font-bold bg-rose-100 text-rose-700 px-2 py-1 rounded-lg border border-rose-200">SPAmov: {orderSummary.spamov}</span>}
+                                    </div>
+                                </div>
                                 <div className="overflow-auto flex-1">
                                     <table className="w-full text-left border-collapse">
-                                        <thead className="bg-white sticky top-0 shadow-sm"><tr><th className="p-4 font-bold text-slate-600 border-b">Cód</th><th className="p-4 font-bold text-slate-600 border-b">Produto</th><th className="p-4 font-bold text-slate-600 border-b text-center">Qtd</th><th className="p-4 font-bold text-rose-700 border-b bg-rose-50 text-right">Preço Un. (-3%)</th></tr></thead>
+                                        <thead className="bg-white sticky top-0 shadow-sm">
+                                            <tr>
+                                                <th className="p-4 font-bold text-slate-600 border-b">Cód</th>
+                                                <th className="p-4 font-bold text-slate-600 border-b text-center">Qtd</th>
+                                                <th className="p-4 font-bold text-rose-700 border-b bg-rose-50 text-right">Preço Unit.</th>
+                                            </tr>
+                                        </thead>
                                         <tbody>
                                             {orderSummary.items.map((i, idx) => (
                                                 <tr key={idx} className="hover:bg-slate-50 border-b border-slate-50">
                                                     <td className="p-4 text-slate-500 font-bold">{i.code}</td>
-                                                    <td className="p-4 text-slate-800 font-medium">{i.name}</td>
                                                     <td className="p-4 text-center text-slate-600 font-bold">{i.quantity}x</td>
-                                                    <td className="p-4 text-right font-bold text-rose-700 bg-rose-50/30">{formatPrice(i.unitFinalPrice)}</td>
+                                                    <td className="p-4 bg-rose-50/30 text-right">
+                                                        <input
+                                                            type="text"
+                                                            value={editedPrices[i.code] !== undefined ? String(editedPrices[i.code]).replace('.', ',') : (i.unitFinalPrice||0).toFixed(2).replace('.',',')}
+                                                            onChange={e => { const num = parseFloat(e.target.value.replace(',','.')); setEditedPrices(prev => ({...prev, [i.code]: isNaN(num) ? i.unitFinalPrice : num})); }}
+                                                            className="w-28 text-right font-bold text-rose-700 bg-transparent border-b-2 border-rose-200 focus:border-rose-600 outline-none px-1 py-0.5"
+                                                        />
+                                                    </td>
                                                 </tr>
                                             ))}
                                         </tbody>
                                     </table>
                                 </div>
-                                
+
                                 {showHistoryPrompt && (
                                      <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between animate-in fade-in slide-in-from-bottom-2">
                                          <div>
@@ -768,6 +841,8 @@
             const [editForm, setEditForm] = useState({});
             const [rawHistoryText, setRawHistoryText] = useState('');
             const [isExtractingHistory, setIsExtractingHistory] = useState(false);
+            const [selectedHistoryCodes, setSelectedHistoryCodes] = useState(new Set());
+            const [rawProfileText, setRawProfileText] = useState('');
             
             useEffect(() => {
                 const unsubscribe = db.collection('clients').onSnapshot(snap => setClients(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
@@ -780,6 +855,16 @@
                     if (current) setEditForm(current);
                 }
             }, [selectedClient, clients]);
+
+            useEffect(() => {
+                if (selectedClient) {
+                    const current = clients.find(c => c.id === selectedClient.id);
+                    if (current) setSelectedHistoryCodes(new Set(current.history || []));
+                } else {
+                    setSelectedHistoryCodes(new Set());
+                    setRawProfileText('');
+                }
+            }, [selectedClient ? selectedClient.id : null]);
             
             const questionsDefinition = [{ id: 'q1', text: '1. Possui açougue interno e desossa carnes?' }, { id: 'q2', text: '2. Compra peças inteiras no osso (Dianteiro/Banda)?' }, { id: 'q3', text: '3. Prefere caixarias já limpas/porcionadas?' }, { id: 'q4', text: '4. Alta demanda por carnes resfriadas (não congeladas)?' }, { id: 'q5', text: '5. Possui setor de frios fatiados na hora?' }, { id: 'q6', text: '6. Compra grande volume de embutidos (Mortadela)?' }, { id: 'q7', text: '7. Serve refeições prontas (Restaurante)?' }, { id: 'q8', text: '8. Preferência por laticínios (Mussarela, Prato)?' }, { id: 'q9', text: '9. Fatia bifes para exposição em balcão?' }, { id: 'q10', text: '10. Busca padronização extrema nos cortes?' }, { id: 'q11', text: '11. Processa carne moída no estabelecimento?' }, { id: 'q12', text: '12. Possui câmara fria para estocagem?' }, { id: 'q13', text: '13. Preferência por produtos de giro rápido/validade curta?' }, { id: 'q14', text: '14. Compra complementos (Pão de alho, Batata)?' }, { id: 'q15', text: '15. Variedade grande de itens (mix amplo)?' }, { id: 'q16', text: '16. Concentra pedidos em poucos itens de volume altíssimo?' }, { id: 'q17', text: '17. Forte foco em churrasco (Picanha, Costela)?' }, { id: 'q18', text: '18. Demanda constante por miúdos/ossos?' }, { id: 'q19', text: '19. Decide compra baseado no menor preço?' }, { id: 'q20', text: '20. Exige marcas específicas para prateleira?' }];
             const initialFormState = { name: '', contactName: '', phone: '', code: '', cnpj: '', address: '' }; questionsDefinition.forEach(q => initialFormState[q.id] = 0);
@@ -848,6 +933,26 @@
                 } catch (e) { showMessage('Erro ao salvar.', 'error'); } finally { setIsExtractingHistory(false); }
             };
 
+            const handleExtractProfileData = () => {
+                if (!rawProfileText.trim()) { showMessage('Cole o texto primeiro.', 'error'); return; }
+                try {
+                    let updates = {};
+                    const clienteMatch = rawProfileText.match(/CLIENTE\s*\[f\]\s*(\d+)/i) || rawProfileText.match(/ID:\s*(\d+)/i);
+                    if (clienteMatch) updates.code = clienteMatch[1].trim();
+                    const cnpjMatch = rawProfileText.match(/CNPJ\s*\(\s*([\d.\-\/]+)\s*\)/i);
+                    if (cnpjMatch) updates.cnpj = cnpjMatch[1].trim();
+                    const nameMatch = rawProfileText.match(/(?:SUPERMERCADO|MERCADO|AÇOUGUE|RESTAURANTE|MERCEARIA)[\s\S]*?(?=\n|CNPJ)/i);
+                    if (nameMatch) { let n = nameMatch[0].trim(); updates.name = n.substring(0, 40); }
+                    const phoneMatch = rawProfileText.match(/(?:FONE|TEL|WHATSAPP|ZAP|CEL)[:\s]*(\(?\d{2}\)?\s*\d{4,5}[-\s]?\d{4})/i);
+                    if (phoneMatch) updates.phone = phoneMatch[1].trim();
+                    const cepMatch = rawProfileText.match(/\b\d{5}-\d{3}\b/);
+                    if (cepMatch) updates.address = cepMatch[0];
+                    setEditForm(prev => ({...prev, ...updates}));
+                    showMessage('Dados extraídos com sucesso!', 'success');
+                    setRawProfileText('');
+                } catch (e) { showMessage('Erro na extração dos dados.', 'error'); }
+            };
+
             if (isAdding) return (
                 <div className="animate-in fade-in">
                     <div className="flex justify-between items-center mb-6"><h2 className="text-2xl font-bold text-slate-800">Novo Cliente Inteligente</h2><button onClick={() => setIsAdding(false)} className="text-slate-500 font-medium px-4 py-2 bg-slate-200 rounded-lg">Voltar</button></div>
@@ -893,6 +998,11 @@
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                                             <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-2 flex items-center gap-2"><div className="h-5 w-5 text-blue-500"><IconUser/></div> Dados Cadastrais</h3>
+                                            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                                <label className="block text-xs font-bold text-slate-600 mb-1 flex items-center gap-1"><div className="h-3.5 w-3.5 text-rose-600 inline-block"><IconWand/></div> Leitor de Cadastro Inteligente</label>
+                                                <textarea value={rawProfileText} onChange={e => setRawProfileText(e.target.value)} placeholder="Cole o bloco do ERP para extrair dados..." className="w-full h-14 p-2 bg-white border rounded-lg outline-none text-xs font-mono resize-none mb-2"/>
+                                                <button type="button" onClick={handleExtractProfileData} className="text-xs bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded-lg font-bold transition-colors">Extrair Dados</button>
+                                            </div>
                                             <div className="space-y-3">
                                                 <div><label className="text-xs font-bold text-slate-500">Nome Fantasia</label><input type="text" value={editForm.name || ''} onChange={e => setEditForm({...editForm, name: e.target.value})} className="w-full p-2.5 bg-slate-50 border rounded-lg text-sm font-bold outline-none focus:border-rose-500"/></div>
                                                 <div><label className="text-xs font-bold text-slate-500">Contato / Proprietário</label><input type="text" value={editForm.contactName || ''} onChange={e => setEditForm({...editForm, contactName: e.target.value})} className="w-full p-2.5 bg-slate-50 border rounded-lg text-sm outline-none focus:border-rose-500"/></div>
@@ -921,16 +1031,27 @@
                                                     <div className="h-full flex items-center justify-center text-slate-400 text-sm font-medium italic">Nenhum histórico registrado.</div>
                                                 ) : (
                                                     <div className="space-y-2 relative">
-                                                        <div className="flex justify-end mb-2 sticky top-0 bg-white pb-2 z-10">
-                                                             <button onClick={() => { window.localStorage.setItem('friganso_offer_codes', JSON.stringify(editForm.history)); setSelectedClient(null); setActiveRoute('orcamentos'); }} className="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1"><IconWhatsApp className="h-3 w-3" /> Enviar Oferta (Zap)</button>
+                                                        <div className="flex justify-between items-center mb-2 sticky top-0 bg-white pb-2 z-10">
+                                                            <div className="flex gap-1.5">
+                                                                <button onClick={() => setSelectedHistoryCodes(new Set(editForm.history || []))} className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-2 py-1 rounded-lg font-bold transition-colors">Todos</button>
+                                                                <button onClick={() => setSelectedHistoryCodes(new Set())} className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-2 py-1 rounded-lg font-bold transition-colors">Nenhum</button>
+                                                            </div>
+                                                            <button
+                                                                disabled={selectedHistoryCodes.size === 0}
+                                                                onClick={() => { window.localStorage.setItem('friganso_offer_codes', JSON.stringify([...selectedHistoryCodes])); setSelectedClient(null); setActiveRoute('orcamentos'); }}
+                                                                className="bg-emerald-100 hover:bg-emerald-200 disabled:opacity-40 text-emerald-800 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5">
+                                                                <div className="h-3 w-3"><IconWhatsApp/></div> Enviar Oferta ({selectedHistoryCodes.size})
+                                                            </button>
                                                         </div>
                                                         {editForm.history.map(code => {
                                                             const p = products.find(prod => prod.code === code);
+                                                            const isChecked = selectedHistoryCodes.has(code);
                                                             return (
-                                                                <div key={code} className="p-2.5 bg-white border border-slate-100 rounded-lg flex items-center gap-3 shadow-sm hover:border-rose-200 transition-colors">
+                                                                <label key={code} className={`p-2.5 rounded-lg flex items-center gap-3 shadow-sm transition-colors cursor-pointer border ${isChecked ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-slate-100 hover:border-rose-200'}`}>
+                                                                    <input type="checkbox" checked={isChecked} onChange={() => { const s = new Set(selectedHistoryCodes); s.has(code) ? s.delete(code) : s.add(code); setSelectedHistoryCodes(s); }} className="h-4 w-4 rounded text-emerald-600 flex-shrink-0 cursor-pointer"/>
                                                                     <span className="bg-rose-100 text-rose-700 px-2 py-1 rounded text-xs font-black">{code}</span>
                                                                     <span className="text-xs font-medium text-slate-700 leading-tight flex-1">{p ? p.name : 'Produto Arquivado'}</span>
-                                                                </div>
+                                                                </label>
                                                             );
                                                         })}
                                                     </div>
@@ -1083,7 +1204,7 @@
                     case 'credits': return <CreditsScreen />;
                     case 'profile': return <ProfileAdminScreen user={user} showMessage={showMessage} />;
                     case 'pdf': return <PdfScreen user={user} products={products} setProducts={setProducts} showMessage={showMessage} />;
-                    case 'resumo': return <ResumoScreen products={products} showMessage={showMessage} clients={clients} />;
+                    case 'resumo': return <ResumoScreen products={products} showMessage={showMessage} clients={clients} setActiveRoute={setActiveRoute} />;
                     case 'orcamentos': return <OrcamentosScreen products={products} showMessage={showMessage} activeRoute={activeRoute} />;
                     default: return <DashboardScreen user={user} />;
                 }
