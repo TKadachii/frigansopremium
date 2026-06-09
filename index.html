@@ -578,6 +578,7 @@
             const [orderText, setOrderText] = useState('');
             const [showModal, setShowModal] = useState(false);
             const [pendingCustomer, setPendingCustomer] = useState('');
+            const [pendingCustomerName, setPendingCustomerName] = useState('');
             const [pendingSpamov, setPendingSpamov] = useState('');
             const [pendingItems, setPendingItems] = useState([]);
             const [orderSummary, setOrderSummary] = useState(null);
@@ -590,9 +591,17 @@
                 if (products.length === 0) { showMessage('Importe ou Baixe a Tabela primeiro!', 'error'); return; }
                 if (!txt.trim()) { showMessage('Cole o texto do pedido.', 'error'); return; }
                 try {
-                    let customerName = '', spamov = '';
+                    let customerName = '', customerRealName = '', spamov = '';
                     const spMatch = txt.match(/SPAmov[:\-\s]*(\d+)/i); if (spMatch) spamov = spMatch[1];
-                    const clienteMatchNormal = txt.match(/(?:cliente|código|codigo)[:\-\s]+(\d+)/i); if (clienteMatchNormal) customerName = clienteMatchNormal[1].trim();
+                    // Tenta capturar "CLIENTE [f] 78804 - Moisés Ramos Filho" ou formatos simples
+                    const clienteMatchBracket = txt.match(/CLIENTE\s*\[f\]\s*(\d+)\s*[-–]\s*([^\n\r\t]+)/i);
+                    const clienteMatchNormal = txt.match(/(?:cliente|código|codigo)[:\-\s]+(\d+)/i);
+                    if (clienteMatchBracket) {
+                        customerName = clienteMatchBracket[1].trim();
+                        customerRealName = clienteMatchBracket[2].trim();
+                    } else if (clienteMatchNormal) {
+                        customerName = clienteMatchNormal[1].trim();
+                    }
 
                     let extractedItemsMap = new Map();
                     txt.split('\n').forEach(line => {
@@ -604,7 +613,7 @@
                     });
 
                     if (extractedItemsMap.size === 0) { showMessage('Nenhum código encontrado na mensagem.', 'error'); return; }
-                    setPendingCustomer(customerName); setPendingSpamov(spamov); setPendingItems(Array.from(extractedItemsMap.values())); setShowModal(true);
+                    setPendingCustomer(customerName); setPendingCustomerName(customerRealName); setPendingSpamov(spamov); setPendingItems(Array.from(extractedItemsMap.values())); setShowModal(true);
                 } catch (err) { showMessage('Erro crítico ao ler pedido.', 'error'); }
             };
 
@@ -616,23 +625,24 @@
                     const qty = Number(item.quantity); return { ...item, quantity: qty, unitFinalPrice, discountedPrice: unitFinalPrice * qty, originalPrice: origPrice * qty, hasDiscount };
                 });
                 setEditedPrices({});
-                setOrderSummary({ customerCode: pendingCustomer, spamov: pendingSpamov, items: processed, totalDiscounted: processed.reduce((acc, c) => acc + c.discountedPrice, 0) });
+                setOrderSummary({ customerCode: pendingCustomer, customerRealName: pendingCustomerName, spamov: pendingSpamov, items: processed, totalDiscounted: processed.reduce((acc, c) => acc + c.discountedPrice, 0) });
                 setShowModal(false);
 
                 if (pendingCustomer) {
                     const existingClient = clients.find(c => c.code === pendingCustomer);
-                    setClientToSave(existingClient || { code: pendingCustomer, isNew: true });
+                    setClientToSave(existingClient || { code: pendingCustomer, realName: pendingCustomerName, isNew: true });
                     setShowHistoryPrompt(true);
                 }
             };
 
-            const handleSaveToHistory = async () => {
+            const handleSaveToHistory = async (goToCrm = false) => {
                 if (!clientToSave) return;
                 const newCodes = orderSummary.items.map(i => i.code);
                 try {
                     if (clientToSave.isNew) {
-                        await db.collection('clients').add({ name: `Cliente ${clientToSave.code}`, code: clientToSave.code, phone: '', cnpj: '', address: '', contactName: '', history: newCodes, rawData: orderText, profile: { title: "Cadastro Automático", color: "bg-slate-100 text-slate-600" } });
-                        showMessage('Novo cliente criado! Acesse CRM & Rotas para completar o cadastro.', 'success');
+                        const clientName = clientToSave.realName ? clientToSave.realName : `Cliente ${clientToSave.code}`;
+                        await db.collection('clients').add({ name: clientName, code: clientToSave.code, phone: '', cnpj: '', address: '', contactName: '', history: newCodes, rawData: orderText, profile: { title: "Cadastro Automático", color: "bg-slate-100 text-slate-600" } });
+                        showMessage('Novo cliente criado! Acesse CRM & Rotas para completar o perfil.', 'success');
                     } else {
                         const currentHistory = clientToSave.history || [];
                         const updatedHistory = [...new Set([...currentHistory, ...newCodes])];
@@ -640,6 +650,7 @@
                         showMessage('Histórico do cliente atualizado!', 'success');
                     }
                     setShowHistoryPrompt(false);
+                    if (goToCrm) setActiveRoute('clients');
                 } catch (err) { showMessage('Erro ao salvar no histórico.', 'error'); }
             };
 
@@ -691,7 +702,7 @@
                                 <div className="mb-4">
                                     <h3 className="text-lg font-bold text-slate-800">Itens do Pedido</h3>
                                     <div className="flex flex-wrap gap-2 mt-2">
-                                        {orderSummary.customerCode && <span className="text-xs font-bold bg-slate-100 text-slate-700 px-2 py-1 rounded-lg border border-slate-200">ID: {orderSummary.customerCode}</span>}
+                                        {orderSummary.customerCode && <span className="text-xs font-bold bg-slate-100 text-slate-700 px-2 py-1 rounded-lg border border-slate-200">ID: {orderSummary.customerCode}{orderSummary.customerRealName ? ` — ${orderSummary.customerRealName}` : ''}</span>}
                                         {orderSummary.spamov && <span className="text-xs font-bold bg-rose-100 text-rose-700 px-2 py-1 rounded-lg border border-rose-200">SPAmov: {orderSummary.spamov}</span>}
                                     </div>
                                 </div>
@@ -724,14 +735,22 @@
                                 </div>
 
                                 {showHistoryPrompt && (
-                                     <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between animate-in fade-in slide-in-from-bottom-2">
-                                         <div>
-                                            <p className="text-sm font-bold text-blue-800">{clientToSave?.isNew ? 'Cliente novo detectado!' : 'Salvar no histórico?'}</p>
-                                            <p className="text-xs text-blue-600 mt-1">{clientToSave?.isNew ? `Deseja cadastrar o ID ${clientToSave.code} e salvar estes itens?` : 'Adicionar itens que o cliente ainda não comprou à ficha dele?'}</p>
+                                     <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl animate-in fade-in slide-in-from-bottom-2">
+                                         <div className="mb-3">
+                                            <p className="text-sm font-bold text-blue-800">{clientToSave?.isNew ? '🆕 Cliente novo detectado!' : '📋 Salvar no histórico?'}</p>
+                                            {clientToSave?.isNew ? (
+                                                <div className="mt-1">
+                                                    <p className="text-xs text-blue-700 font-bold">ID: {clientToSave.code}{clientToSave.realName ? ` — ${clientToSave.realName}` : ''}</p>
+                                                    <p className="text-xs text-blue-600 mt-0.5">Este cliente não está na sua lista. Deseja adicioná-lo ao CRM e salvar os itens do pedido no histórico dele?</p>
+                                                </div>
+                                            ) : (
+                                                <p className="text-xs text-blue-600 mt-1">Adicionar os itens deste pedido ao histórico de compras de <b>{clientToSave?.name}</b>?</p>
+                                            )}
                                          </div>
-                                         <div className="flex gap-2">
-                                            <button onClick={() => setShowHistoryPrompt(false)} className="px-3 py-1.5 text-xs font-bold text-blue-600 hover:bg-blue-100 rounded-lg transition-colors">Não</button>
-                                            <button onClick={handleSaveToHistory} className="px-3 py-1.5 text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 rounded-lg shadow-sm transition-colors">Sim, Salvar</button>
+                                         <div className="flex flex-wrap gap-2">
+                                            <button onClick={() => setShowHistoryPrompt(false)} className="px-3 py-1.5 text-xs font-bold text-blue-600 hover:bg-blue-100 rounded-lg transition-colors border border-blue-200">Não</button>
+                                            <button onClick={() => handleSaveToHistory(false)} className="px-3 py-1.5 text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 rounded-lg shadow-sm transition-colors">Sim, salvar</button>
+                                            {clientToSave?.isNew && <button onClick={() => handleSaveToHistory(true)} className="px-3 py-1.5 text-xs font-bold bg-rose-700 text-white hover:bg-rose-800 rounded-lg shadow-sm transition-colors">Salvar e completar perfil no CRM →</button>}
                                          </div>
                                      </div>
                                 )}
