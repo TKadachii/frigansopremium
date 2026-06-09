@@ -639,8 +639,10 @@
                 try {
                     if (clientToSave.isNew) {
                         const autoName = detectedClientName || `Cliente ${clientToSave.code}`;
-                        await db.collection('clients').add({ name: autoName, code: clientToSave.code, phone: '', cnpj: '', address: '', contactName: '', history: newCodes, rawData: orderText, profile: { title: "Cadastro Automático", color: "bg-slate-100 text-slate-600" } });
-                        showMessage('Novo cliente criado! Acesse CRM & Rotas para completar o cadastro.', 'success');
+                        const docRef = await db.collection('clients').add({ name: autoName, code: clientToSave.code, phone: '', cnpj: '', address: '', contactName: '', history: newCodes, rawData: orderText, profile: { title: "Cadastro Automático", color: "bg-slate-100 text-slate-600" } });
+                        window.localStorage.setItem('friganso_open_client_id', docRef.id);
+                        showMessage('Cliente criado! Abrindo perfil no CRM...', 'success');
+                        setTimeout(() => setActiveRoute('clients'), 900);
                     } else {
                         const currentHistory = clientToSave.history || [];
                         const updatedHistory = [...new Set([...currentHistory, ...newCodes])];
@@ -854,11 +856,23 @@
             const [isExtractingHistory, setIsExtractingHistory] = useState(false);
             const [selectedHistoryCodes, setSelectedHistoryCodes] = useState(new Set());
             const [rawProfileText, setRawProfileText] = useState('');
-            
+
             useEffect(() => {
                 const unsubscribe = db.collection('clients').onSnapshot(snap => setClients(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
                 return () => unsubscribe();
             }, []);
+
+            // Auto-abre perfil do cliente recém-criado vindo do Resumo de Pedido
+            useEffect(() => {
+                const pendingId = window.localStorage.getItem('friganso_open_client_id');
+                if (pendingId && clients.length > 0) {
+                    const found = clients.find(c => c.id === pendingId);
+                    if (found) {
+                        window.localStorage.removeItem('friganso_open_client_id');
+                        setSelectedClient(found);
+                    }
+                }
+            }, [clients]);
 
             useEffect(() => {
                 if (selectedClient) {
